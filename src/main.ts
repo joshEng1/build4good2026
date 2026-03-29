@@ -87,6 +87,264 @@ const bindHorizontalScroller = ({
   updateScrollerState()
 }
 
+type ProductsCustomSelectControl = {
+  close: (restoreFocus?: boolean) => void
+  refresh: () => void
+  syncFromSelect: () => void
+}
+
+let activeProductsSelectCloser: ((restoreFocus?: boolean) => void) | null = null
+
+// Mirror native product filters with a custom menu so the open state can match the site styling.
+const createProductsCustomSelect = (select: HTMLSelectElement): ProductsCustomSelectControl => {
+  const field = select.closest<HTMLElement>('.products-field')
+
+  if (!field) {
+    return {
+      close: () => { },
+      refresh: () => { },
+      syncFromSelect: () => { },
+    }
+  }
+
+  const fieldLabel = field.querySelector(':scope > span')?.textContent?.trim() || 'Filter'
+  const triggerId = `${select.id}-trigger`
+  const menuId = `${select.id}-menu`
+  const customSelect = document.createElement('div')
+  const trigger = document.createElement('button')
+  const triggerValue = document.createElement('span')
+  const triggerIcon = document.createElement('span')
+  const menu = document.createElement('div')
+  const optionList = document.createElement('div')
+  let optionButtons: HTMLButtonElement[] = []
+
+  field.classList.add('is-enhanced-select')
+  customSelect.className = 'products-custom-select'
+
+  trigger.type = 'button'
+  trigger.id = triggerId
+  trigger.className = 'products-custom-trigger'
+  trigger.setAttribute('aria-haspopup', 'listbox')
+  trigger.setAttribute('aria-expanded', 'false')
+  trigger.setAttribute('aria-controls', menuId)
+  trigger.setAttribute('aria-label', fieldLabel)
+
+  triggerValue.className = 'products-custom-value'
+
+  triggerIcon.className = 'products-custom-icon'
+  triggerIcon.setAttribute('aria-hidden', 'true')
+
+  trigger.append(triggerValue, triggerIcon)
+
+  menu.className = 'products-custom-panel'
+  menu.id = menuId
+  menu.setAttribute('role', 'listbox')
+  menu.setAttribute('aria-labelledby', triggerId)
+
+  optionList.className = 'products-custom-options'
+  menu.append(optionList)
+  customSelect.append(trigger, menu)
+  field.append(customSelect)
+
+  const availableButtons = () => optionButtons.filter((optionButton) => !optionButton.disabled)
+
+  const focusOptionAt = (position: number) => {
+    const available = availableButtons()
+
+    if (!available.length) return
+
+    const nextPosition = Math.min(Math.max(position, 0), available.length - 1)
+    available[nextPosition].focus()
+  }
+
+  const focusSelectedOption = () => {
+    const available = availableButtons()
+
+    if (!available.length) return
+
+    const selectedPosition = available.findIndex((optionButton) => optionButton.dataset.value === select.value)
+    focusOptionAt(selectedPosition >= 0 ? selectedPosition : 0)
+  }
+
+  const closeMenu = (restoreFocus = false) => {
+    customSelect.classList.remove('is-open')
+    trigger.setAttribute('aria-expanded', 'false')
+
+    if (activeProductsSelectCloser === closeMenu) {
+      activeProductsSelectCloser = null
+    }
+
+    if (restoreFocus) {
+      trigger.focus()
+    }
+  }
+
+  const openMenu = () => {
+    if (select.disabled) return
+
+    if (activeProductsSelectCloser && activeProductsSelectCloser !== closeMenu) {
+      activeProductsSelectCloser()
+    }
+
+    customSelect.classList.add('is-open')
+    trigger.setAttribute('aria-expanded', 'true')
+    activeProductsSelectCloser = closeMenu
+
+    requestAnimationFrame(() => {
+      focusSelectedOption()
+    })
+  }
+
+  const toggleMenu = () => {
+    if (customSelect.classList.contains('is-open')) {
+      closeMenu()
+      return
+    }
+
+    openMenu()
+  }
+
+  const syncFromSelect = () => {
+    const activeOption = select.selectedOptions[0] || select.options[0]
+
+    triggerValue.textContent = activeOption?.text || fieldLabel
+    field.classList.toggle('is-disabled', select.disabled)
+    trigger.disabled = select.disabled
+
+    optionButtons.forEach((optionButton) => {
+      const isSelected = optionButton.dataset.value === select.value
+      optionButton.classList.toggle('is-selected', isSelected)
+      optionButton.setAttribute('aria-selected', String(isSelected))
+    })
+
+    if (select.disabled) {
+      closeMenu()
+    }
+  }
+
+  const refresh = () => {
+    closeMenu()
+
+    optionButtons = Array.from(select.options).map((option) => {
+      const optionButton = document.createElement('button')
+
+      optionButton.type = 'button'
+      optionButton.className = 'products-custom-option'
+      optionButton.dataset.value = option.value
+      optionButton.textContent = option.text
+      optionButton.disabled = option.disabled
+      optionButton.setAttribute('role', 'option')
+      optionButton.setAttribute('aria-selected', String(option.selected))
+
+      optionButton.addEventListener('click', () => {
+        if (optionButton.disabled) return
+
+        const hasChanged = select.value !== option.value
+        select.value = option.value
+        syncFromSelect()
+        closeMenu(true)
+
+        if (hasChanged) {
+          select.dispatchEvent(new Event('change', { bubbles: true }))
+        }
+      })
+
+      optionButton.addEventListener('keydown', (event) => {
+        const available = availableButtons()
+        const currentPosition = available.indexOf(optionButton)
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault()
+          focusOptionAt(currentPosition + 1)
+          return
+        }
+
+        if (event.key === 'ArrowUp') {
+          event.preventDefault()
+          focusOptionAt(currentPosition - 1)
+          return
+        }
+
+        if (event.key === 'Home') {
+          event.preventDefault()
+          focusOptionAt(0)
+          return
+        }
+
+        if (event.key === 'End') {
+          event.preventDefault()
+          focusOptionAt(available.length - 1)
+          return
+        }
+
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          closeMenu(true)
+          return
+        }
+
+        if (event.key === 'Tab') {
+          closeMenu()
+        }
+      })
+
+      return optionButton
+    })
+
+    optionList.replaceChildren(...optionButtons)
+    syncFromSelect()
+  }
+
+  trigger.addEventListener('click', toggleMenu)
+
+  trigger.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      openMenu()
+      return
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      openMenu()
+      return
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      toggleMenu()
+      return
+    }
+
+    if (event.key === 'Escape' && customSelect.classList.contains('is-open')) {
+      event.preventDefault()
+      closeMenu()
+    }
+  })
+
+  select.addEventListener('change', syncFromSelect)
+
+  document.addEventListener('pointerdown', (event) => {
+    const eventTarget = event.target
+
+    if (!(eventTarget instanceof Node) || customSelect.contains(eventTarget)) return
+
+    closeMenu()
+  })
+
+  window.addEventListener('resize', () => {
+    closeMenu()
+  })
+
+  refresh()
+
+  return {
+    close: closeMenu,
+    refresh,
+    syncFromSelect,
+  }
+}
+
 const initHeroIntro = () => {
   const hero = q<HTMLElement>('.hero')
   if (!hero) return
@@ -132,8 +390,8 @@ const initHeroIntro = () => {
     tl.from('.hero-actions', { opacity: 0, y: 24, duration: 1 }, 1.3)
   }
 
-  if (q('.about-hero-panel')) {
-    tl.from('.about-hero-panel', { opacity: 0, x: 40, duration: 1 }, 1.05)
+  if (q('.about-hero-brand')) {
+    tl.from('.about-hero-brand', { opacity: 0, x: 40, scale: 0.94, duration: 1 }, 1.05)
   }
 
   if (q('.navbar')) {
@@ -161,8 +419,8 @@ const initServices = () => {
     .from('.services-label', { opacity: 0, y: 20, duration: 0.6 })
     .from('.services-heading', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' }, '-=0.4')
     .from('.services-intro', { opacity: 0, y: 24, duration: 0.6 }, '-=0.5')
-    .from('.nav-arrow', { opacity: 0, scale: 0.8, stagger: 0.1, duration: 0.4 }, '-=0.6')
-    .from('.service-card', {
+    .from('.services-section .nav-arrow', { opacity: 0, scale: 0.8, stagger: 0.1, duration: 0.4 }, '-=0.6')
+    .from('.services-section .service-card', {
       opacity: 0,
       y: 60,
       stagger: 0.15,
@@ -229,6 +487,7 @@ const initHeatmap = () => {
   const popoverDesc = q<HTMLElement>('#popover-desc')
   const closePopoverBtn = q<HTMLButtonElement>('#close-popover')
   const popoverImg = q<HTMLImageElement>('#popover-img')
+  const popoverCta = q<HTMLAnchorElement>('#popover-cta')
   const allPins = qa<HTMLElement>('.hotspot-pin')
   const HOTSPOT_POPOVER_GAP = 35
   const HOTSPOT_POPOVER_PADDING = 16
@@ -251,6 +510,28 @@ const initHeatmap = () => {
     }
 
     return { left, top }
+  }
+
+  const buildHotspotProductsHref = (target: HTMLElement) => {
+    const params = new URLSearchParams()
+    const filterMake = target.getAttribute('data-filter-make')
+    const filterModel = target.getAttribute('data-filter-model')
+    const filterCategory = target.getAttribute('data-filter-category')
+    const filterSearch = target.getAttribute('data-filter-search')
+    const hotspot = target.getAttribute('data-hotspot')
+
+    if (filterMake || filterModel || filterCategory || filterSearch || hotspot) {
+      params.set('source', 'heatmap')
+    }
+
+    if (filterMake) params.set('make', filterMake)
+    if (filterModel) params.set('model', filterModel)
+    if (filterCategory) params.set('category', filterCategory)
+    if (filterSearch) params.set('search', filterSearch)
+    if (hotspot) params.set('hotspot', hotspot)
+
+    const query = params.toString()
+    return query ? `/products.html?${query}#productFilters` : '/products.html#productFilters'
   }
 
   toggleBtns.forEach((btn) => {
@@ -297,6 +578,10 @@ const initHeatmap = () => {
       const showPopover = () => {
         popoverTitle.textContent = title
         popoverDesc.textContent = desc
+
+        if (popoverCta) {
+          popoverCta.href = buildHotspotProductsHref(target)
+        }
 
         if (popoverImg) {
           if (imgSrc) {
@@ -389,23 +674,28 @@ const initHeatmap = () => {
   })
 }
 
+const initWelcomeSections = () => {
+  animateGroup('.customer-builds-section', '.about-brand-header, .about-builds-carousel', { y: 56, stagger: 0.14 })
+  animateGroup('.testimonials-section', '.testimonials-header, .testimonial-card', { y: 42, stagger: 0.12 })
+  animateGroup('.process-preview-section', '.process-preview-header, .process-preview-card, .process-preview-link', { y: 48, stagger: 0.12 })
+
+  bindHorizontalScroller({
+    trackSelector: '#homeBuildsTrack',
+    prevSelector: '#homeBuildsPrev',
+    nextSelector: '#homeBuildsNext',
+    progressSelector: '#homeBuildsProgress',
+    itemSelector: '.about-gallery-card',
+    gap: 24,
+  })
+}
+
 const initAboutAnimations = () => {
   if (!q('.about-page')) return
 
-  animateGroup('.about-brand-section', '.about-brand-header, .about-builds-carousel', { y: 56, stagger: 0.14 })
   animateGroup('.about-differentiators-section', '.about-difference-card')
   animateGroup('.founder-section', '.founder-portrait-shell, .founder-content', { y: 56, stagger: 0.18 })
   animateGroup('.faq-section', '.faq-item', { y: 32, stagger: 0.08 })
   animateGroup('.about-connect-section', '.about-connect-copy, .about-connect-card', { y: 56, stagger: 0.16 })
-
-  bindHorizontalScroller({
-    trackSelector: '#aboutBuildsTrack',
-    prevSelector: '#aboutBuildsPrev',
-    nextSelector: '#aboutBuildsNext',
-    progressSelector: '#aboutBuildsProgress',
-    itemSelector: '.about-gallery-card',
-    gap: 24,
-  })
 
   const processTimeline = q<HTMLElement>('#aboutProcessTimeline')
   const processSteps = qa<HTMLElement>('.about-step')
@@ -447,6 +737,7 @@ const initProductsPage = () => {
   const visibleCount = q<HTMLElement>('#productCount')
   const stockCount = q<HTMLElement>('#stockCount')
   const activeFilterCount = q<HTMLElement>('#activeFilterCount')
+  const filterNotice = q<HTMLElement>('#productFilterNotice')
   const resultsCopy = q<HTMLElement>('#resultsCopy')
   const inventoryTotal = q<HTMLElement>('#inventoryTotal')
   const makeTotal = q<HTMLElement>('#makeTotal')
@@ -472,14 +763,55 @@ const initProductsPage = () => {
     return
   }
 
-  const filterState = {
+  type ProductsFilterState = {
+    search: string
+    make: string
+    model: string
+    category: string
+  }
+
+  const createDefaultFilterState = (): ProductsFilterState => ({
     search: '',
     make: 'all',
     model: 'all',
     category: 'all',
-  }
+  })
+
+  const filterState = createDefaultFilterState()
+  const queryParams = new URLSearchParams(window.location.search)
+  const isHeatmapSource = queryParams.get('source') === 'heatmap'
+  const requestedHotspot = (queryParams.get('hotspot') || '').trim()
 
   const normalise = (value: string) => value.toLowerCase().trim()
+  const readFilterParam = (key: 'search' | 'make' | 'model' | 'category') => (queryParams.get(key) || '').trim()
+  const makeFilterControl = createProductsCustomSelect(makeFilter)
+  const modelFilterControl = createProductsCustomSelect(modelFilter)
+  const categoryFilterControl = createProductsCustomSelect(categoryFilter)
+
+  const refreshFilterControls = () => {
+    makeFilterControl.refresh()
+    modelFilterControl.refresh()
+    categoryFilterControl.refresh()
+  }
+
+  const syncFilterControls = () => {
+    makeFilterControl.syncFromSelect()
+    modelFilterControl.syncFromSelect()
+    categoryFilterControl.syncFromSelect()
+  }
+
+  const setFilterState = (nextState: ProductsFilterState) => {
+    filterState.search = nextState.search
+    filterState.make = nextState.make
+    filterState.model = nextState.model
+    filterState.category = nextState.category
+  }
+
+  const setFilterNotice = (message = '') => {
+    if (!filterNotice) return
+    filterNotice.hidden = message.length === 0
+    filterNotice.textContent = message
+  }
 
   const matchesSearch = (product: ProductRecord, query: string) => {
     if (!query) return true
@@ -500,21 +832,21 @@ const initProductsPage = () => {
     return haystack.includes(query)
   }
 
-  const filteredProducts = () =>
+  const filteredProducts = (state: ProductsFilterState = filterState) =>
     productCatalog.filter((product) => {
-      if (filterState.make !== 'all' && product.make !== filterState.make) {
+      if (state.make !== 'all' && product.make !== state.make) {
         return false
       }
 
-      if (filterState.model !== 'all' && product.model !== filterState.model) {
+      if (state.model !== 'all' && product.model !== state.model) {
         return false
       }
 
-      if (filterState.category !== 'all' && product.category !== filterState.category) {
+      if (state.category !== 'all' && product.category !== state.category) {
         return false
       }
 
-      return matchesSearch(product, normalise(filterState.search))
+      return matchesSearch(product, normalise(state.search))
     })
 
   const renderModelOptions = () => {
@@ -531,6 +863,8 @@ const initProductsPage = () => {
     if (!availableModels.includes(filterState.model)) {
       filterState.model = 'all'
     }
+
+    modelFilterControl.refresh()
   }
 
   const renderOptions = () => {
@@ -543,6 +877,8 @@ const initProductsPage = () => {
       .join('')
 
     renderModelOptions()
+    makeFilterControl.refresh()
+    categoryFilterControl.refresh()
   }
 
   const getStockSignal = (stock: number) => {
@@ -637,6 +973,7 @@ const initProductsPage = () => {
       filterState.make !== 'all' ? `Make ${filterState.make}` : '',
       filterState.model !== 'all' ? `Model ${filterState.model}` : '',
       filterState.category !== 'all' ? `Category ${filterState.category}` : '',
+      filterState.search ? `Search ${filterState.search}` : '',
     ].filter(Boolean)
 
     visibleCount.textContent = String(products.length)
@@ -651,6 +988,7 @@ const initProductsPage = () => {
     categoryFilter.value = filterState.category
     renderModelOptions()
     modelFilter.value = filterState.model
+    syncFilterControls()
   }
 
   const renderProducts = () => {
@@ -661,15 +999,57 @@ const initProductsPage = () => {
   }
 
   const resetFilterState = () => {
-    filterState.search = ''
-    filterState.make = 'all'
-    filterState.model = 'all'
-    filterState.category = 'all'
+    setFilterNotice()
+    setFilterState(createDefaultFilterState())
     syncControls()
     renderProducts()
   }
 
+  const hasSeededFilters = ['search', 'make', 'model', 'category'].some((key) => queryParams.has(key))
+
+  const getSeededFilterState = (): ProductsFilterState => ({
+    search: readFilterParam('search'),
+    make: readFilterParam('make') || 'all',
+    model: readFilterParam('model') || 'all',
+    category: readFilterParam('category') || 'all',
+  })
+
+  const applySeededFilters = () => {
+    if (!hasSeededFilters) return
+
+    const requestedState = getSeededFilterState()
+
+    if (!isHeatmapSource) {
+      setFilterState(requestedState)
+      return
+    }
+
+    const fallbackStates: ProductsFilterState[] = [
+      requestedState,
+      { ...requestedState, model: 'all' },
+      { ...requestedState, model: 'all', make: 'all' },
+    ]
+
+    const matchingState = fallbackStates.find((candidateState) => filteredProducts(candidateState).length > 0)
+
+    if (matchingState) {
+      setFilterState(matchingState)
+
+      if (matchingState !== requestedState) {
+        const hotspotLabel = requestedHotspot || 'this heatmap selection'
+        setFilterNotice(
+          `No exact Ford F 150 catalog match is available for ${hotspotLabel}. Showing the closest available results instead.`,
+        )
+      }
+
+      return
+    }
+
+    setFilterState(requestedState)
+  }
+
   makeFilter.addEventListener('change', (event) => {
+    setFilterNotice()
     filterState.make = (event.currentTarget as HTMLSelectElement).value
 
     if (filterState.make === 'all') {
@@ -682,16 +1062,19 @@ const initProductsPage = () => {
   })
 
   modelFilter.addEventListener('change', (event) => {
+    setFilterNotice()
     filterState.model = (event.currentTarget as HTMLSelectElement).value
     renderProducts()
   })
 
   categoryFilter.addEventListener('change', (event) => {
+    setFilterNotice()
     filterState.category = (event.currentTarget as HTMLSelectElement).value
     renderProducts()
   })
 
   searchInput.addEventListener('input', (event) => {
+    setFilterNotice()
     filterState.search = (event.currentTarget as HTMLInputElement).value
     renderProducts()
   })
@@ -703,7 +1086,9 @@ const initProductsPage = () => {
   makeTotal.textContent = String(productMakes.length)
   categoryTotal.textContent = String(productCategories.length)
 
+  applySeededFilters()
   renderOptions()
+  refreshFilterControls()
   syncControls()
   renderProducts()
 
@@ -739,6 +1124,7 @@ const initProductsPage = () => {
 
 initHeroIntro()
 initServices()
+initWelcomeSections()
 initHeatmap()
 initAboutAnimations()
 initProductsPage()

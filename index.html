@@ -20,12 +20,12 @@
       <img src="/logo.png" alt="Thewconverts Logo" />
     </div>
     <div class="nav-links">
-      <a href="#about">About</a>
-      <a href="#products">Products</a>
-      <a href="#builds">Builds</a>
-      <a href="#faq">FAQ</a>
+      <a href="#hero">Welcome</a>
+      <a href="/about.html">About</a>
+      <a href="/products.html">Products</a>
+      <a href="/about.html#faq">FAQ</a>
     </div>
-    <button class="cta-nav">Book Appointment</button>
+    <a href="#contact" class="cta-nav">Book Appointment</a>
   </nav>
 
   <header class="hero" id="hero">
@@ -50,8 +50,8 @@
       </p>
       <div class="hero-actions split-line">
         <span>
-          <button class="btn-primary">Purchase Upgrades</button>
-          <button class="btn-secondary">Check out Work</button>
+          <a href="/products.html" class="btn-primary">Explore Upgrades</a>
+          <a href="#interactive-builds" class="btn-secondary">Check out Work</a>
         </span>
       </div>
     </div>
@@ -60,12 +60,12 @@
   <section class="services-section" id="services">
     <div class="container services-container">
       <div class="services-header split-line-wrapper">
-        <div class="services-label">— SERVICES</div>
+        <div class="services-label">Explore</div>
         <div class="services-title-row">
           <h2 class="services-heading">UPGRADE YOUR RIDE</h2>
           <div class="carousel-nav">
-            <button class="nav-arrow" id="prevServices">←</button>
-            <button class="nav-arrow" id="nextServices">→</button>
+            <button class="nav-arrow" id="prevServices" aria-label="Previous service">&#8592;</button>
+            <button class="nav-arrow" id="nextServices" aria-label="Next service">&#8594;</button>
           </div>
         </div>
         <p class="services-intro">Explore premium OEM capabilities, custom finishes, and conversion packages built to elevate every detail.</p>
@@ -124,7 +124,7 @@
   <section class="heatmap-section" id="interactive-builds">
     <div class="container heatmap-container">
       <div class="heatmap-header split-line-wrapper">
-        <div class="heatmap-label">— OEM INTERACTIVE VIEWER</div>
+        <div class="heatmap-label">OEM INTERACTIVE VIEWER</div>
         <div class="heatmap-title-row">
           <h2 class="heatmap-heading skew-text">EXPLORE THE OPTIONS</h2>
           <div class="view-toggle">
@@ -214,14 +214,14 @@
 
         <!-- Hotspot Detail Popover (Shared) -->
         <div class="hotspot-popover" id="hotspot-popover">
-          <button class="close-popover" id="close-popover">✕</button>
+          <button class="close-popover" id="close-popover" aria-label="Close popover">&times;</button>
           <div class="popover-img-container" id="popover-img-container">
             <img id="popover-img" src="" alt="Part Image">
           </div>
           <div class="popover-content">
             <h4 class="popover-title" id="popover-title">OEM Part</h4>
             <p class="popover-desc" id="popover-desc">Part description goes here.</p>
-            <a href="#products" class="btn-primary popover-btn">View Products</a>
+            <a href="/products.html" class="btn-primary popover-btn">Explore Upgrades</a>
           </div>
         </div>
       </div>
@@ -278,7 +278,7 @@
   <section class="contact-section" id="contact">
     <div class="container contact-container">
       <div class="contact-header split-line-wrapper">
-        <div class="contact-label">— GET IN TOUCH</div>
+        <div class="contact-label">GET IN TOUCH</div>
         <h2 class="contact-heading skew-text">READY TO BUILD?</h2>
       </div>
 
@@ -331,9 +331,10 @@
           <img src="/logo.png" alt="Thewconverts Logo">
         </div>
         <div class="footer-nav">
-          <a href="#about">About</a>
-          <a href="#products">Products</a>
-          <a href="#builds">Builds</a>
+          <a href="#hero">Welcome</a>
+          <a href="/about.html">About</a>
+          <a href="/products.html">Products</a>
+          <a href="/about.html#faq">FAQ</a>
           <a href="#contact">Contact</a>
         </div>
       </div>
@@ -369,7 +370,7 @@
             <h6>Limitation of Liability</h6>
             <p>To the fullest extent permitted by law, Thewconverts LLC shall not be liable for any indirect,
               incidental, special, or consequential damages arising from the use of, inability to use, or installation
-              of our products — including but not limited to loss of use, loss of income, vehicle downtime, property
+              of our products, including but not limited to loss of use, loss of income, vehicle downtime, property
               damage, or personal injury. Our total liability shall not exceed the original purchase price of the
               product in question.</p>
           </div>

@@ -138,28 +138,32 @@
 
           <!-- Hotspot: Headlights -->
           <button class="hotspot-pin" style="top: 47.3%; left: 37.9%;" data-title="OEM Headlights"
-            data-desc="Upgrade to factory-grade LED headlights for superior visibility and modern styling.">
+            data-desc="Upgrade to factory-grade LED headlights for superior visibility and modern styling."
+            data-img="/Product-Image-1.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
 
           <!-- Hotspot: Grille -->
           <button class="hotspot-pin" style="top: 49.8%; left: 28.4%;" data-title="Custom Grille"
-            data-desc="Aggressive front-end styling with direct bolt-on OEM or premium aftermarket grilles.">
+            data-desc="Aggressive front-end styling with direct bolt-on OEM or premium aftermarket grilles."
+            data-img="/Product-Image-2.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
 
           <!-- Hotspot: Suspension / Wheels -->
           <button class="hotspot-pin" style="top: 64.3%; left: 44.5%;" data-title="Suspension & Wheels"
-            data-desc="Leveling kits and OEM wheel upgrades for a perfect stance and improved clearance.">
+            data-desc="Leveling kits and OEM wheel upgrades for a perfect stance and improved clearance."
+            data-img="/Product-Image-3.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
 
           <!-- Hotspot: Mirrors -->
           <button class="hotspot-pin" style="top: 41.8%; left: 52.2%;" data-title="Mirrors"
-            data-desc="OEM mirror upgrades with blind spot monitoring and power-folding.">
+            data-desc="OEM mirror upgrades with blind spot monitoring and power-folding."
+            data-img="/Product-Image-4.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
@@ -172,27 +176,31 @@
 
           <!-- Hotspot: Steering Wheel -->
           <button class="hotspot-pin" style="top: 23.9%; left: 86.1%;" data-title="Premium Steering Wheel"
-            data-desc="Leather-wrapped or Raptor-style steering wheels with full functional controls intact.">
+            data-desc="Leather-wrapped or Raptor-style steering wheels with full functional controls intact."
+            data-img="/Product-Image-5.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
 
           <!-- Hotspot: Cluster -->
           <button class="hotspot-pin" style="top: 49.3%; left: 94.3%;" data-title="Digital Cluster Panel"
-            data-desc="Fully digital instrument cluster upgrade directly from higher trim packages.">
+            data-desc="Fully digital instrument cluster upgrade directly from higher trim packages."
+            data-img="/Product-Image-1.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
 
           <!-- Hotspot: Center Console -->
           <button class="hotspot-pin" style="top: 42.5%; left: 57.6%;" data-title="Center Console"
-            data-desc="Premium center console upgrades with additional storage and charging options.">
+            data-desc="Premium center console upgrades with additional storage and charging options."
+            data-img="/Product-Image-2.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
           <!--HotSpot: Seat -->
           <button class="hotspot-pin" style="top: 67.7%; left: 31.8%;" data-title="Seat"
-            data-desc="Premium leather seat upgrades with heating and cooling.">
+            data-desc="Premium leather seat upgrades with heating and cooling."
+            data-img="/Product-Image-3.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
@@ -201,13 +209,133 @@
         <!-- Hotspot Detail Popover (Shared) -->
         <div class="hotspot-popover" id="hotspot-popover">
           <button class="close-popover" id="close-popover">✕</button>
-          <h4 class="popover-title" id="popover-title">OEM Part</h4>
-          <p class="popover-desc" id="popover-desc">Part description goes here.</p>
-          <a href="#products" class="btn-primary popover-btn">View Products</a>
+          <div class="popover-img-container" id="popover-img-container">
+            <img id="popover-img" src="" alt="Part Image">
+          </div>
+          <div class="popover-content">
+            <h4 class="popover-title" id="popover-title">OEM Part</h4>
+            <p class="popover-desc" id="popover-desc">Part description goes here.</p>
+            <a href="#products" class="btn-primary popover-btn">View Products</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Newsletter Section -->
+  <section class="newsletter-section" id="newsletter">
+    <div class="container newsletter-container">
+      <div class="newsletter-content">
+        <h2 class="skew-text">JOIN THE LIST</h2>
+        <p>Get exclusive early access to our custom OEM builds and rare part drops.</p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="YOUR EMAIL ADDRESS" required>
+          <button type="submit" class="btn-primary">SUBSCRIBE</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section" id="contact">
+    <div class="container contact-container">
+      <div class="contact-header split-line-wrapper">
+        <div class="contact-label">— GET IN TOUCH</div>
+        <h2 class="contact-heading skew-text">READY TO BUILD?</h2>
+      </div>
+      
+      <div class="contact-grid">
+        <div class="contact-form-wrapper">
+          <form class="contact-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">NAME</label>
+                <input type="text" id="name" placeholder="John Doe" required>
+              </div>
+              <div class="form-group">
+                <label for="email">EMAIL</label>
+                <input type="email" id="email" placeholder="john@example.com" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="message">MESSAGE</label>
+              <textarea id="message" rows="4" placeholder="Tell us about your truck and what OEM upgrades you're looking for..." required></textarea>
+            </div>
+            <button type="submit" class="btn-primary form-submit">SEND INQUIRY</button>
+          </form>
+        </div>
+        
+        <div class="contact-info-wrapper">
+          <div class="info-block">
+            <h3>DIRECT CONTACT</h3>
+            <a href="mailto:matt81503@gmail.com" class="contact-link email-link">matt81503@gmail.com</a>
+          </div>
+          <div class="info-block">
+            <h3>FOLLOW US</h3>
+            <div class="social-links">
+              <a href="https://instagram.com/thewconverts" target="_blank" class="social-link">Instagram <span>@thewconverts</span></a>
+              <a href="https://tiktok.com/@thewconverts" target="_blank" class="social-link">TikTok <span>@thewconverts</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <img src="/logo.png" alt="Thewconverts Logo">
+        </div>
+        <div class="footer-nav">
+          <a href="#about">About</a>
+          <a href="#products">Products</a>
+          <a href="#builds">Builds</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+
+      <div class="legal-disclaimers">
+        <h5>LEGAL & DISCLAIMERS</h5>
+        <div class="legal-grid">
+          <div class="legal-item">
+            <h6>Fitment & Compatibility</h6>
+            <p>Compatibility depends on the customer's specific vehicle configuration. Buyers must verify fitment before purchase. We are not responsible if a part does not work due to undocumented factory options or prior modifications.</p>
+          </div>
+          <div class="legal-item">
+            <h6>Installation & Use</h6>
+            <p>Professional installation is recommended. We are not responsible for damage, injury, or malfunctions resulting from improper installation or misuse of our products.</p>
+          </div>
+          <div class="legal-item">
+            <h6>No Manufacturer Affiliation</h6>
+            <p>Thewconverts LLC is not affiliated with, endorsed by, or sponsored by Ford or any other vehicle manufacturer. All manufacturer names and trademarks are used for identification purposes only.</p>
+          </div>
+          <div class="legal-item">
+            <h6>Warranty</h6>
+            <p>All parts are inspected and tested prior to shipment. Items that arrive defective or non-functional are eligible for warranty consideration. Proof of failure may be required. Warranty does not cover damage caused by improper installation, misuse, modification, or failure to follow provided instructions. Professional installation is strongly recommended for complex components. Except for verified defective items, all sales are final and non-returnable.</p>
+          </div>
+          <div class="legal-item">
+            <h6>Limitation of Liability</h6>
+            <p>To the fullest extent permitted by law, Thewconverts LLC shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of, inability to use, or installation of our products — including but not limited to loss of use, loss of income, vehicle downtime, property damage, or personal injury. Our total liability shall not exceed the original purchase price of the product in question.</p>
+          </div>
+          <div class="legal-item">
+            <h6>Programming & Electronic Modifications</h6>
+            <p>Some upgrades for modern trucks may require programming, calibration, or additional modules. These are not included unless explicitly specified in the product listing.</p>
+          </div>
+          <div class="legal-item">
+            <h6>Confidentiality & Privacy</h6>
+            <p>We do not publicly disclose sensitive business information including supplier identities, sourcing channels, wholesale pricing, proprietary processes, or custom harness designs. All customer information is used solely for order fulfillment and support, and will not be shared without consent except as required by law.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 Thewconverts LLC. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 
   <script type="module" src="/src/main.ts"></script>
 </body>

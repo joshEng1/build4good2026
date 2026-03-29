@@ -118,11 +118,14 @@ gsap.registerPlugin(ScrollTrigger)
   // Open Popover
   let popoverTimeout: ReturnType<typeof setTimeout> | null = null;
   const allPins = document.querySelectorAll('.hotspot-pin')
+  const popoverImg = document.getElementById('popover-img') as HTMLImageElement
+
   allPins.forEach(pin => {
     pin.addEventListener('click', (e) => {
       const target = e.currentTarget as HTMLElement
       const title = target.getAttribute('data-title') || 'OEM Part'
       const desc = target.getAttribute('data-desc') || 'Part description.'
+      const imgSrc = target.getAttribute('data-img') || ''
       
       if (popover && popoverTitle && popoverDesc) {
         if (popoverTimeout) clearTimeout(popoverTimeout);
@@ -130,6 +133,15 @@ gsap.registerPlugin(ScrollTrigger)
         const showPopover = () => {
           popoverTitle.textContent = title
           popoverDesc.textContent = desc
+          
+          if (popoverImg) {
+            if (imgSrc) {
+              popoverImg.src = imgSrc
+              popoverImg.style.display = 'block'
+            } else {
+              popoverImg.style.display = 'none'
+            }
+          }
           
           const canvas = target.closest('.heatmap-canvas') as HTMLElement
           if (canvas) {

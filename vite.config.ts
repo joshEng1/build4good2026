@@ -11,6 +11,7 @@ export default defineConfig({
         main: resolve(rootDir, 'index.html'),
         about: resolve(rootDir, 'about.html'),
         products: resolve(rootDir, 'products.html'),
+        manager: resolve(rootDir, 'manager.html'),
       },
     },
   },

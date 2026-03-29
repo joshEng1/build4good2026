@@ -1,3 +1,11 @@
+export type ProductVehicleRecord = {
+  id: string
+  year: string
+  make: string
+  model: string
+  label: string
+}
+
 export type ProductRecord = {
   id: string
   sku: string
@@ -10,6 +18,15 @@ export type ProductRecord = {
   image: string
   description: string
   tags: string[]
+  vehicles: ProductVehicleRecord[]
+  makes: string[]
+  models: string[]
+  compatibility: string
+  manufacturer: string
+  price: number | null
+  positions: string[]
+  otherNames: string[]
+  replaces: string
 }
 
 export type ProductCatalogMeta = {
@@ -20,10 +37,104 @@ export type ProductCatalogMeta = {
   productInventoryTotal: number
 }
 
-const makeOrder = ['Ford', 'Chevrolet', 'GMC', 'Ram']
-const categoryOrder = ['Lighting', 'Mirrors', 'Interior', 'Seats', 'Steering', 'Wheels', 'Exterior']
+type SeedProductInput = {
+  id: string
+  sku: string
+  title: string
+  make: string
+  model: string
+  years: string
+  category: string
+  stock: number
+  image: string
+  description: string
+  tags: string[]
+  manufacturer?: string
+  price?: number | null
+  positions?: string[]
+  otherNames?: string[]
+  replaces?: string
+}
 
-export const productCatalog: ProductRecord[] = [
+const makeOrder = ['Ford', 'Chevrolet', 'GMC', 'Ram']
+const categoryOrder = ['Lighting', 'Mirrors', 'Interior', 'Seats', 'Steering', 'Wheels', 'Exterior', 'Body part']
+
+const createVehicleLabel = (year: string, make: string, model: string) =>
+  [year, make, model].filter(Boolean).join(' ')
+
+const createSeedRecord = (seed: SeedProductInput): ProductRecord => {
+  const vehicle = {
+    id: `${seed.id}-fitment-1`,
+    year: seed.years,
+    make: seed.make,
+    model: seed.model,
+    label: createVehicleLabel(seed.years, seed.make, seed.model),
+  }
+
+  return {
+    ...seed,
+    vehicles: [vehicle],
+    makes: [seed.make],
+    models: [seed.model],
+    compatibility: `Fits ${seed.make} ${seed.model}`,
+    manufacturer: seed.manufacturer || 'OEM',
+    price: seed.price ?? null,
+    positions: seed.positions || [],
+    otherNames: seed.otherNames || [],
+    replaces: seed.replaces || '',
+  }
+}
+
+export const createCompatibilitySummary = (vehicles: ProductVehicleRecord[]) => {
+  if (!vehicles.length) {
+    return 'Fitment details in progress'
+  }
+
+  if (vehicles.length === 1) {
+    return `Fits ${vehicles[0].label}`
+  }
+
+  const labels = vehicles.slice(0, 2).map((vehicle) => vehicle.label)
+  const remaining = vehicles.length - labels.length
+  const visibleLabel = labels.join(' and ')
+
+  return remaining > 0
+    ? `Fits ${visibleLabel}, plus ${remaining} more`
+    : `Fits ${visibleLabel}`
+}
+
+export const createYearsSummary = (vehicles: ProductVehicleRecord[]) => {
+  const years = Array.from(new Set(vehicles.map((vehicle) => vehicle.year).filter(Boolean)))
+
+  if (!years.length) {
+    return 'Fitment in progress'
+  }
+
+  return years.join(', ')
+}
+
+export const createPrimaryVehicleSummary = (vehicles: ProductVehicleRecord[]) => {
+  if (!vehicles.length) {
+    return {
+      make: 'Multiple makes',
+      model: 'Fitment list',
+    }
+  }
+
+  if (vehicles.length === 1) {
+    return {
+      make: vehicles[0].make,
+      model: vehicles[0].model,
+    }
+  }
+
+  return {
+    make: vehicles[0].make,
+    model: `${vehicles[0].model} +${vehicles.length - 1}`,
+  }
+}
+
+const seedCatalogInput: SeedProductInput[] = [
   {
     id: 'ford-led-headlight-set',
     sku: 'TWC-F150-LGT-101',
@@ -182,9 +293,23 @@ export const productCatalog: ProductRecord[] = [
   },
 ]
 
+export const productCatalog: ProductRecord[] = seedCatalogInput.map(createSeedRecord)
+
 export const createProductCatalogMeta = (products: ProductRecord[]): ProductCatalogMeta => {
-  const availableMakes = Array.from(new Set(products.map((product) => product.make)))
-  const availableCategories = Array.from(new Set(products.map((product) => product.category)))
+  const vehicleEntries = products.flatMap((product) =>
+    product.vehicles.length
+      ? product.vehicles
+      : [{
+        id: `${product.id}-fallback`,
+        year: product.years,
+        make: product.make,
+        model: product.model,
+        label: createVehicleLabel(product.years, product.make, product.model),
+      }],
+  )
+
+  const availableMakes = Array.from(new Set(vehicleEntries.map((vehicle) => vehicle.make).filter(Boolean)))
+  const availableCategories = Array.from(new Set(products.map((product) => product.category).filter(Boolean)))
   const productMakes = makeOrder
     .filter((make) => availableMakes.includes(make))
     .concat(availableMakes.filter((make) => !makeOrder.includes(make)).sort())
@@ -193,14 +318,14 @@ export const createProductCatalogMeta = (products: ProductRecord[]): ProductCata
     .filter((category) => availableCategories.includes(category))
     .concat(availableCategories.filter((category) => !categoryOrder.includes(category)).sort())
 
-  const productModelsByMake = products.reduce<Record<string, string[]>>((accumulator, product) => {
-    if (!accumulator[product.make]) {
-      accumulator[product.make] = []
+  const productModelsByMake = vehicleEntries.reduce<Record<string, string[]>>((accumulator, vehicle) => {
+    if (!accumulator[vehicle.make]) {
+      accumulator[vehicle.make] = []
     }
 
-    if (!accumulator[product.make].includes(product.model)) {
-      accumulator[product.make].push(product.model)
-      accumulator[product.make].sort()
+    if (!accumulator[vehicle.make].includes(vehicle.model)) {
+      accumulator[vehicle.make].push(vehicle.model)
+      accumulator[vehicle.make].sort()
     }
 
     return accumulator

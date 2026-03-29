@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products | Thewconverts OEM Truck Upgrades</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body class="products-page">
+  <nav class="navbar">
+    <div class="logo">
+      <img src="/logo.png" alt="Thewconverts Logo" />
+    </div>
+    <div class="nav-links">
+      <a href="/index.html#hero">Welcome</a>
+      <a href="/about.html">About</a>
+      <a href="/products.html">Products</a>
+      <a href="/about.html#faq">FAQ</a>
+    </div>
+    <a href="/index.html#contact" class="cta-nav">
+      <span class="cta-nav-kicker">Start Your Build</span>
+      <span class="cta-nav-label">Book Appointment</span>
+    </a>
+  </nav>
+
+  <header class="products-hero">
+    <div class="products-shell">
+      <div class="products-hero-grid">
+        <div class="products-hero-copy">
+          <div class="products-kicker">OEM catalog and fitment first inventory</div>
+          <h1 class="products-title">SEARCH THE <span>OEM</span> PARTS THAT FIT THE BUILD.</h1>
+          <p class="products-body">
+            Browse the inventory by make, model, and category to see what parts match your truck. Search mirrors, seats,
+            lighting, steering, wheels, or interior upgrades, then narrow the catalog to the exact OEM pathway that
+            makes sense for the platform.
+          </p>
+          <div class="products-hero-actions">
+            <a href="#productFilters" class="btn-primary">Browse Inventory</a>
+            <a href="/about.html" class="btn-secondary">Learn the Process</a>
+          </div>
+        </div>
+
+        <aside class="products-facts" aria-label="Inventory overview">
+          <div class="products-fact-card">
+            <strong id="inventoryTotal">0</strong>
+            <span>Total parts in the working catalog.</span>
+          </div>
+          <div class="products-fact-card">
+            <strong id="makeTotal">0</strong>
+            <span>Truck platforms currently represented.</span>
+          </div>
+          <div class="products-fact-card">
+            <strong id="categoryTotal">0</strong>
+            <span>Categories ready for filtering and search.</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <main class="products-section">
+    <div class="products-shell">
+      <section class="products-card-shell" aria-labelledby="productsFilterHeading">
+        <div class="products-section-header">
+          <div class="products-section-label">Store system</div>
+          <h2 class="products-section-heading" id="productsFilterHeading">Filter by vehicle, part type, or keyword.</h2>
+          <p class="products-section-copy">
+            This catalog is built to help customers narrow the right product quickly. Select a make and model, limit the
+            category, or type a specific term to see the parts that match the build direction.
+          </p>
+          <p class="products-source-note" id="productsSourceNote" aria-live="polite">Loading product catalog...</p>
+        </div>
+
+        <form class="products-filters" id="productFilters">
+          <label class="products-field">
+            <span>Search</span>
+            <input type="search" id="productSearchInput" placeholder="Search mirrors, seats, steering, cluster, or SKU">
+          </label>
+
+          <label class="products-field">
+            <span>Make</span>
+            <select id="productMakeFilter"></select>
+          </label>
+
+          <label class="products-field">
+            <span>Model</span>
+            <select id="productModelFilter"></select>
+          </label>
+
+          <label class="products-field">
+            <span>Category</span>
+            <select id="productCategoryFilter"></select>
+          </label>
+
+          <div class="products-filter-actions">
+            <button type="button" class="btn-secondary" id="productsClearFilters">Reset</button>
+          </div>
+        </form>
+
+        <div class="products-stats" aria-label="Filter summary">
+          <div class="products-stat">
+            <strong id="productCount">0</strong>
+            <span>Products shown right now.</span>
+          </div>
+          <div class="products-stat">
+            <strong id="stockCount">0</strong>
+            <span>Low stock parts in this result set.</span>
+          </div>
+          <div class="products-stat">
+            <strong id="activeFilterCount">All</strong>
+            <span>Current active filter set.</span>
+          </div>
+        </div>
+
+        <p class="products-filter-notice" id="productFilterNotice" aria-live="polite" hidden></p>
+
+        <section class="products-results" aria-labelledby="productsResultsHeading">
+          <div class="products-results-header">
+            <div>
+              <div class="products-section-label">Results</div>
+              <h2 class="products-section-heading" id="productsResultsHeading">Catalog matches</h2>
+            </div>
+            <p class="products-results-count" id="resultsCopy">Showing <strong>0</strong> products.</p>
+          </div>
+
+          <div class="products-grid" id="productGrid"></div>
+
+          <div class="products-empty" id="productEmpty" hidden>
+            <div class="products-empty-inner">
+              <h3>No products match that filter set.</h3>
+              <p>Clear the filters or try a broader search to bring the matching OEM parts back into view.</p>
+              <button type="button" class="btn-secondary" id="emptyReset">Reset Search</button>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <footer class="main-footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <img src="/logo.png" alt="Thewconverts Logo">
+        </div>
+        <div class="footer-nav">
+          <a href="/index.html#hero">Welcome</a>
+          <a href="/about.html">About</a>
+          <a href="/products.html">Products</a>
+          <a href="/about.html#faq">FAQ</a>
+          <a href="/index.html#contact">Contact</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Thewconverts LLC. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

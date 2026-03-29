@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ScrollTrigger.create({
     trigger: '.pin-section',
     start: 'top top',
-    end: '+=1000',
+    end: 'bottom top',
     pin: true,
     animation: gsap.to('.stats-row', { opacity: 1, y: 0 }),
     scrub: true

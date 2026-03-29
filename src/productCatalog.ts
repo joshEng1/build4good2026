@@ -12,6 +12,14 @@ export type ProductRecord = {
   tags: string[]
 }
 
+export type ProductCatalogMeta = {
+  productMakes: string[]
+  productCategories: string[]
+  productModelsByMake: Record<string, string[]>
+  productCatalogBySku: Record<string, ProductRecord>
+  productInventoryTotal: number
+}
+
 const makeOrder = ['Ford', 'Chevrolet', 'GMC', 'Ram']
 const categoryOrder = ['Lighting', 'Mirrors', 'Interior', 'Seats', 'Steering', 'Wheels', 'Exterior']
 
@@ -174,29 +182,50 @@ export const productCatalog: ProductRecord[] = [
   },
 ]
 
-export const productMakes = makeOrder.filter((make) =>
-  productCatalog.some((product) => product.make === make),
-)
+export const createProductCatalogMeta = (products: ProductRecord[]): ProductCatalogMeta => {
+  const availableMakes = Array.from(new Set(products.map((product) => product.make)))
+  const availableCategories = Array.from(new Set(products.map((product) => product.category)))
+  const productMakes = makeOrder
+    .filter((make) => availableMakes.includes(make))
+    .concat(availableMakes.filter((make) => !makeOrder.includes(make)).sort())
 
-export const productCategories = categoryOrder.filter((category) =>
-  productCatalog.some((product) => product.category === category),
-)
+  const productCategories = categoryOrder
+    .filter((category) => availableCategories.includes(category))
+    .concat(availableCategories.filter((category) => !categoryOrder.includes(category)).sort())
 
-export const productModelsByMake = productCatalog.reduce<Record<string, string[]>>((accumulator, product) => {
-  if (!accumulator[product.make]) {
-    accumulator[product.make] = []
+  const productModelsByMake = products.reduce<Record<string, string[]>>((accumulator, product) => {
+    if (!accumulator[product.make]) {
+      accumulator[product.make] = []
+    }
+
+    if (!accumulator[product.make].includes(product.model)) {
+      accumulator[product.make].push(product.model)
+      accumulator[product.make].sort()
+    }
+
+    return accumulator
+  }, {})
+
+  const productCatalogBySku = products.reduce<Record<string, ProductRecord>>((accumulator, product) => {
+    accumulator[product.sku] = product
+    return accumulator
+  }, {})
+
+  const productInventoryTotal = products.reduce((total, product) => total + product.stock, 0)
+
+  return {
+    productMakes,
+    productCategories,
+    productModelsByMake,
+    productCatalogBySku,
+    productInventoryTotal,
   }
+}
 
-  if (!accumulator[product.make].includes(product.model)) {
-    accumulator[product.make].push(product.model)
-  }
-
-  return accumulator
-}, {})
-
-export const productCatalogBySku = productCatalog.reduce<Record<string, ProductRecord>>((accumulator, product) => {
-  accumulator[product.sku] = product
-  return accumulator
-}, {})
-
-export const productInventoryTotal = productCatalog.reduce((total, product) => total + product.stock, 0)
+export const {
+  productMakes,
+  productCategories,
+  productModelsByMake,
+  productCatalogBySku,
+  productInventoryTotal,
+} = createProductCatalogMeta(productCatalog)

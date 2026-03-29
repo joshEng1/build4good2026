@@ -2,11 +2,8 @@ import './style.css'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
-  productCategories,
+  createProductCatalogMeta,
   productCatalog,
-  productInventoryTotal,
-  productMakes,
-  productModelsByMake,
   type ProductRecord,
 } from './productCatalog'
 
@@ -91,6 +88,12 @@ type ProductsCustomSelectControl = {
   close: (restoreFocus?: boolean) => void
   refresh: () => void
   syncFromSelect: () => void
+}
+
+type ProductCatalogApiResponse = {
+  source: 'mongodb' | 'seed'
+  products: ProductRecord[]
+  error?: string
 }
 
 let activeProductsSelectCloser: ((restoreFocus?: boolean) => void) | null = null
@@ -738,6 +741,7 @@ const initProductsPage = () => {
   const stockCount = q<HTMLElement>('#stockCount')
   const activeFilterCount = q<HTMLElement>('#activeFilterCount')
   const filterNotice = q<HTMLElement>('#productFilterNotice')
+  const sourceNote = q<HTMLElement>('#productsSourceNote')
   const resultsCopy = q<HTMLElement>('#resultsCopy')
   const inventoryTotal = q<HTMLElement>('#inventoryTotal')
   const makeTotal = q<HTMLElement>('#makeTotal')
@@ -781,12 +785,14 @@ const initProductsPage = () => {
   const queryParams = new URLSearchParams(window.location.search)
   const isHeatmapSource = queryParams.get('source') === 'heatmap'
   const requestedHotspot = (queryParams.get('hotspot') || '').trim()
+  let catalogProducts = productCatalog.slice()
 
   const normalise = (value: string) => value.toLowerCase().trim()
   const readFilterParam = (key: 'search' | 'make' | 'model' | 'category') => (queryParams.get(key) || '').trim()
   const makeFilterControl = createProductsCustomSelect(makeFilter)
   const modelFilterControl = createProductsCustomSelect(modelFilter)
   const categoryFilterControl = createProductsCustomSelect(categoryFilter)
+  const getCatalogMeta = () => createProductCatalogMeta(catalogProducts)
 
   const refreshFilterControls = () => {
     makeFilterControl.refresh()
@@ -813,6 +819,12 @@ const initProductsPage = () => {
     filterNotice.textContent = message
   }
 
+  const setSourceNote = (message: string, tone: 'live' | 'fallback' = 'live') => {
+    if (!sourceNote) return
+    sourceNote.textContent = message
+    sourceNote.dataset.tone = tone
+  }
+
   const matchesSearch = (product: ProductRecord, query: string) => {
     if (!query) return true
 
@@ -833,7 +845,7 @@ const initProductsPage = () => {
   }
 
   const filteredProducts = (state: ProductsFilterState = filterState) =>
-    productCatalog.filter((product) => {
+    catalogProducts.filter((product) => {
       if (state.make !== 'all' && product.make !== state.make) {
         return false
       }
@@ -850,8 +862,9 @@ const initProductsPage = () => {
     })
 
   const renderModelOptions = () => {
+    const { productModelsByMake } = getCatalogMeta()
     const availableModels = filterState.make === 'all'
-      ? Array.from(new Set(productCatalog.map((product) => product.model))).sort()
+      ? Array.from(new Set(catalogProducts.map((product) => product.model))).sort()
       : productModelsByMake[filterState.make] || []
 
     modelFilter.innerHTML = ['<option value="all">All models</option>']
@@ -868,6 +881,8 @@ const initProductsPage = () => {
   }
 
   const renderOptions = () => {
+    const { productMakes, productCategories } = getCatalogMeta()
+
     makeFilter.innerHTML = ['<option value="all">All makes</option>']
       .concat(productMakes.map((make) => `<option value="${make}">${make}</option>`))
       .join('')
@@ -879,6 +894,13 @@ const initProductsPage = () => {
     renderModelOptions()
     makeFilterControl.refresh()
     categoryFilterControl.refresh()
+  }
+
+  const renderCatalogTotals = () => {
+    const { productInventoryTotal, productMakes, productCategories } = getCatalogMeta()
+    inventoryTotal.textContent = String(productInventoryTotal)
+    makeTotal.textContent = String(productMakes.length)
+    categoryTotal.textContent = String(productCategories.length)
   }
 
   const getStockSignal = (stock: number) => {
@@ -1082,15 +1104,62 @@ const initProductsPage = () => {
   resetFilters.addEventListener('click', resetFilterState)
   emptyReset.addEventListener('click', resetFilterState)
 
-  inventoryTotal.textContent = String(productInventoryTotal)
-  makeTotal.textContent = String(productMakes.length)
-  categoryTotal.textContent = String(productCategories.length)
+  const loadCatalog = async () => {
+    try {
+      const response = await fetch('/api/products', {
+        headers: {
+          Accept: 'application/json',
+        },
+      })
 
-  applySeededFilters()
-  renderOptions()
-  refreshFilterControls()
-  syncControls()
-  renderProducts()
+      if (!response.ok) {
+        throw new Error(`Catalog request failed with status ${response.status}.`)
+      }
+
+      const payload = await response.json() as ProductCatalogApiResponse
+
+      if (!Array.isArray(payload.products) || payload.products.length === 0) {
+        throw new Error('Catalog response did not include any products.')
+      }
+
+      catalogProducts = payload.products
+
+      if (payload.source === 'mongodb') {
+        setSourceNote('Connected to the live MongoDB product catalog.', 'live')
+        return
+      }
+
+      const fallbackReason = payload.error ? ` ${payload.error}` : ''
+      setSourceNote(`MongoDB is unavailable right now. Showing the local product snapshot.${fallbackReason}`, 'fallback')
+    } catch (error) {
+      catalogProducts = productCatalog.slice()
+      const message = error instanceof Error ? error.message : 'Unable to load the live catalog.'
+      setSourceNote(`MongoDB is unavailable right now. Showing the local product snapshot. ${message}`, 'fallback')
+    }
+  }
+
+  const initialiseCatalog = async () => {
+    setSourceNote('Loading product catalog...', 'live')
+    await loadCatalog()
+    renderOptions()
+    refreshFilterControls()
+    applySeededFilters()
+    syncControls()
+    renderCatalogTotals()
+    renderProducts()
+
+    gsap.from('.products-card-shell, .product-card', {
+      opacity: 0,
+      y: 42,
+      stagger: 0.06,
+      duration: 0.8,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.products-section',
+        start: 'top bottom',
+      },
+    })
+  }
 
   const introTl = gsap.timeline({ defaults: { ease: 'power4.out', duration: 0.9 } })
   introTl
@@ -1109,17 +1178,7 @@ const initProductsPage = () => {
     })
   }
 
-  gsap.from('.products-card-shell, .product-card', {
-    opacity: 0,
-    y: 42,
-    stagger: 0.06,
-    duration: 0.8,
-    ease: 'power3.out',
-    scrollTrigger: {
-      trigger: '.products-section',
-      start: 'top bottom',
-    },
-  })
+  void initialiseCatalog()
 }
 
 initHeroIntro()

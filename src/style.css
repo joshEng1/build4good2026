@@ -1181,6 +1181,17 @@ a {
   line-height: 1.7;
 }
 
+.products-source-note {
+  margin: 0.2rem 0 0;
+  color: rgba(245, 241, 235, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.products-source-note[data-tone='fallback'] {
+  color: rgba(255, 210, 194, 0.9);
+}
+
 .products-filters {
   position: relative;
   z-index: 8;

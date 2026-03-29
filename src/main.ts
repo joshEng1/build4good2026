@@ -96,6 +96,37 @@ type ProductCatalogApiResponse = {
   error?: string
 }
 
+type ManagerSessionResponse = {
+  authenticated: boolean
+  configured: boolean
+  error?: string
+}
+
+type ManagerPartsResponse = {
+  parts: ProductRecord[]
+  error?: string
+}
+
+type ManagerVehiclesResponse = {
+  vehicles: ProductRecord['vehicles']
+  error?: string
+}
+
+type ManagerPartMutationResponse = {
+  part: ProductRecord | null
+  error?: string
+}
+
+type ManagerVehicleMutationResponse = {
+  vehicle: ProductRecord['vehicles'][number]
+  error?: string
+}
+
+type UploadResponse = {
+  path: string
+  error?: string
+}
+
 let activeProductsSelectCloser: ((restoreFocus?: boolean) => void) | null = null
 
 // Mirror native product filters with a custom menu so the open state can match the site styling.
@@ -831,11 +862,18 @@ const initProductsPage = () => {
     const haystack = [
       product.title,
       product.sku,
+      product.compatibility,
       product.make,
       product.model,
+      ...product.makes,
+      ...product.models,
       product.category,
       product.years,
       product.description,
+      product.manufacturer,
+      ...product.positions,
+      ...product.otherNames,
+      ...product.vehicles.map((vehicle) => vehicle.label),
       ...product.tags,
     ]
       .join(' ')
@@ -846,11 +884,11 @@ const initProductsPage = () => {
 
   const filteredProducts = (state: ProductsFilterState = filterState) =>
     catalogProducts.filter((product) => {
-      if (state.make !== 'all' && product.make !== state.make) {
+      if (state.make !== 'all' && !product.makes.includes(state.make)) {
         return false
       }
 
-      if (state.model !== 'all' && product.model !== state.model) {
+      if (state.model !== 'all' && !product.models.includes(state.model)) {
         return false
       }
 
@@ -864,7 +902,7 @@ const initProductsPage = () => {
   const renderModelOptions = () => {
     const { productModelsByMake } = getCatalogMeta()
     const availableModels = filterState.make === 'all'
-      ? Array.from(new Set(catalogProducts.map((product) => product.model))).sort()
+      ? Array.from(new Set(Object.values(productModelsByMake).flat())).sort()
       : productModelsByMake[filterState.make] || []
 
     modelFilter.innerHTML = ['<option value="all">All models</option>']
@@ -945,9 +983,10 @@ const initProductsPage = () => {
 
   const renderProductCard = (product: ProductRecord) => {
     const stockSignal = getStockSignal(product.stock)
+    const priceLabel = product.price !== null ? `$${product.price.toFixed(2)}` : 'Quote on request'
 
     return `
-    <article class="product-card ${stockSignal.tone}" data-make="${product.make}" data-model="${product.model}" data-category="${product.category}">
+    <article class="product-card ${stockSignal.tone}" data-make="${product.makes.join(',')}" data-model="${product.models.join(',')}" data-category="${product.category}">
       <div class="product-card-media">
         <img src="${product.image}" alt="${product.title} for ${product.make} ${product.model}">
         <div class="product-card-badges">
@@ -960,14 +999,23 @@ const initProductsPage = () => {
           <h3>${product.title}</h3>
           <p>${product.description}</p>
         </div>
+        <p class="product-card-compatibility">${product.compatibility}</p>
         <div class="product-card-specs" aria-label="Product specifications">
           <div class="product-spec">
-            <span>Vehicle</span>
+            <span>Primary fitment</span>
             <strong>${product.make} ${product.model}</strong>
           </div>
           <div class="product-spec">
-            <span>Years</span>
+            <span>Linked years</span>
             <strong>${product.years}</strong>
+          </div>
+          <div class="product-spec">
+            <span>Manufacturer</span>
+            <strong>${product.manufacturer}</strong>
+          </div>
+          <div class="product-spec">
+            <span>Price</span>
+            <strong>${priceLabel}</strong>
           </div>
         </div>
         <div class="product-card-status-row">
@@ -1181,9 +1229,499 @@ const initProductsPage = () => {
   void initialiseCatalog()
 }
 
+const initManagerPage = () => {
+  if (!q('.manager-page')) return
+
+  const loginCard = q<HTMLElement>('#managerLoginCard')
+  const dashboard = q<HTMLElement>('#managerDashboard')
+  const loginForm = q<HTMLFormElement>('#managerLoginForm')
+  const passcodeInput = q<HTMLInputElement>('#managerPasscode')
+  const loginStatus = q<HTMLElement>('#managerLoginStatus')
+  const formStatus = q<HTMLElement>('#managerFormStatus')
+  const loginButton = q<HTMLButtonElement>('.manager-login-button')
+  const logoutButton = q<HTMLButtonElement>('#managerLogoutButton')
+  const refreshButton = q<HTMLButtonElement>('#managerRefreshButton')
+  const searchInput = q<HTMLInputElement>('#managerSearchInput')
+  const addVehicleButton = q<HTMLButtonElement>('#managerAddVehicleButton')
+  const uploadButton = q<HTMLButtonElement>('#managerUploadButton')
+  const resetButton = q<HTMLButtonElement>('#managerResetButton')
+  const newPartButton = q<HTMLButtonElement>('#managerNewPartButton')
+  const partForm = q<HTMLFormElement>('#managerPartForm')
+  const partList = q<HTMLElement>('#managerPartList')
+  const vehicleList = q<HTMLElement>('#managerVehicleList')
+  const editorTitle = q<HTMLElement>('#managerEditorTitle')
+  const imagePreview = q<HTMLImageElement>('#managerImagePreviewImg')
+  const imageFileInput = q<HTMLInputElement>('#managerImageFile')
+  const imagePathInput = q<HTMLInputElement>('#managerImagePath')
+  const partIdInput = q<HTMLInputElement>('#managerPartId')
+  const partTitleInput = q<HTMLInputElement>('#managerPartTitle')
+  const partSkuInput = q<HTMLInputElement>('#managerPartSku')
+  const manufacturerInput = q<HTMLInputElement>('#managerManufacturer')
+  const categoryInput = q<HTMLInputElement>('#managerCategory')
+  const priceInput = q<HTMLInputElement>('#managerPrice')
+  const stockInput = q<HTMLInputElement>('#managerStock')
+  const descriptionInput = q<HTMLTextAreaElement>('#managerDescription')
+  const positionsInput = q<HTMLInputElement>('#managerPositions')
+  const otherNamesInput = q<HTMLInputElement>('#managerOtherNames')
+  const replacesInput = q<HTMLInputElement>('#managerReplaces')
+  const vehicleYearInput = q<HTMLInputElement>('#managerVehicleYear')
+  const vehicleMakeInput = q<HTMLInputElement>('#managerVehicleMake')
+  const vehicleModelInput = q<HTMLInputElement>('#managerVehicleModel')
+  const partCount = q<HTMLElement>('#managerPartCount')
+  const vehicleCount = q<HTMLElement>('#managerVehicleCount')
+  const stockTotal = q<HTMLElement>('#managerStockTotal')
+
+  if (
+    !loginCard ||
+    !dashboard ||
+    !loginForm ||
+    !passcodeInput ||
+    !loginStatus ||
+    !formStatus ||
+    !loginButton ||
+    !logoutButton ||
+    !refreshButton ||
+    !searchInput ||
+    !addVehicleButton ||
+    !uploadButton ||
+    !resetButton ||
+    !newPartButton ||
+    !partForm ||
+    !partList ||
+    !vehicleList ||
+    !editorTitle ||
+    !imagePreview ||
+    !imageFileInput ||
+    !imagePathInput ||
+    !partIdInput ||
+    !partTitleInput ||
+    !partSkuInput ||
+    !manufacturerInput ||
+    !categoryInput ||
+    !priceInput ||
+    !stockInput ||
+    !descriptionInput ||
+    !positionsInput ||
+    !otherNamesInput ||
+    !replacesInput ||
+    !vehicleYearInput ||
+    !vehicleMakeInput ||
+    !vehicleModelInput ||
+    !partCount ||
+    !vehicleCount ||
+    !stockTotal
+  ) {
+    return
+  }
+
+  let managerParts: ProductRecord[] = []
+  let managerVehicles: ProductRecord['vehicles'] = []
+  let currentSearch = ''
+  let currentEditPartId = ''
+
+  const parseCommaList = (value: string) =>
+    value
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+
+  const setLoginStatus = (message = '', tone = '') => {
+    loginStatus.textContent = message
+    loginStatus.dataset.tone = tone
+  }
+
+  const setFormStatus = (message = '', tone = '') => {
+    formStatus.textContent = message
+    formStatus.dataset.tone = tone
+  }
+
+  const setDashboardVisibility = (authenticated: boolean) => {
+    loginCard.hidden = authenticated
+    dashboard.hidden = !authenticated
+    dashboard.toggleAttribute('aria-hidden', !authenticated)
+    loginCard.toggleAttribute('aria-hidden', authenticated)
+
+    if (authenticated) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    }
+  }
+
+  const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
+    const response = await fetch(url, init)
+    const payload = await response.json().catch(() => ({})) as { error?: string }
+
+    if (!response.ok) {
+      throw new Error(payload.error || `Request failed with status ${response.status}.`)
+    }
+
+    return payload as T
+  }
+
+  const updateSummaryCards = () => {
+    partCount.textContent = String(managerParts.length)
+    vehicleCount.textContent = String(managerVehicles.length)
+    stockTotal.textContent = String(managerParts.reduce((total, part) => total + part.stock, 0))
+  }
+
+  const getSelectedVehicleIds = () =>
+    qa<HTMLInputElement>('.manager-vehicle-checkbox:checked').map((checkbox) => Number(checkbox.value))
+
+  const renderVehicleList = (selectedVehicleIds: number[] = getSelectedVehicleIds()) => {
+    if (!managerVehicles.length) {
+      vehicleList.innerHTML = '<p class="manager-empty-copy">No vehicles are available yet. Add one below to start linking fitment.</p>'
+      return
+    }
+
+    vehicleList.innerHTML = managerVehicles
+      .map((vehicle) => {
+        const vehicleId = Number(vehicle.id)
+        const checked = selectedVehicleIds.includes(vehicleId) ? 'checked' : ''
+
+        return `
+          <label class="manager-vehicle-option">
+            <input class="manager-vehicle-checkbox" type="checkbox" value="${vehicleId}" ${checked}>
+            <span>${vehicle.label}</span>
+          </label>
+        `
+      })
+      .join('')
+  }
+
+  const resetForm = () => {
+    currentEditPartId = ''
+    editorTitle.textContent = 'Create a new part'
+    partForm.reset()
+    partIdInput.value = ''
+    manufacturerInput.value = 'OEM'
+    stockInput.value = '0'
+    imagePathInput.value = ''
+    imagePreview.src = '/logo.png'
+    renderVehicleList([])
+    setFormStatus()
+  }
+
+  const populateForm = (part: ProductRecord) => {
+    currentEditPartId = part.id
+    editorTitle.textContent = `Edit ${part.title}`
+    partIdInput.value = part.id
+    partTitleInput.value = part.title
+    partSkuInput.value = part.sku
+    manufacturerInput.value = part.manufacturer
+    categoryInput.value = part.category
+    priceInput.value = part.price === null ? '' : String(part.price)
+    stockInput.value = String(part.stock)
+    descriptionInput.value = part.description
+    positionsInput.value = part.positions.join(', ')
+    otherNamesInput.value = part.otherNames.join(', ')
+    replacesInput.value = part.replaces
+    imagePathInput.value = part.image
+    imagePreview.src = part.image || '/logo.png'
+    renderVehicleList(part.vehicles.map((vehicle) => Number(vehicle.id)))
+    setFormStatus()
+  }
+
+  const renderPartList = () => {
+    const query = currentSearch.trim().toLowerCase()
+    const visibleParts = managerParts.filter((part) => {
+      if (!query) return true
+
+      const haystack = [
+        part.title,
+        part.sku,
+        part.category,
+        part.manufacturer,
+        part.compatibility,
+        ...part.makes,
+        ...part.models,
+      ]
+        .join(' ')
+        .toLowerCase()
+
+      return haystack.includes(query)
+    })
+
+    if (!visibleParts.length) {
+      partList.innerHTML = '<p class="manager-empty-copy">No parts match the current search.</p>'
+      return
+    }
+
+    partList.innerHTML = visibleParts
+      .map((part) => `
+        <article class="manager-part-card" data-part-id="${part.id}">
+          <div class="manager-part-card-media">
+            <img src="${part.image}" alt="${part.title}">
+          </div>
+          <div class="manager-part-card-body">
+            <div class="manager-part-card-top">
+              <div>
+                <div class="manager-kicker">${part.category}</div>
+                <h4>${part.title}</h4>
+              </div>
+              <span class="manager-stock-pill">${part.stock} in stock</span>
+            </div>
+            <p>${part.compatibility}</p>
+            <div class="manager-part-meta">
+              <span>SKU ${part.sku}</span>
+              <span>${part.manufacturer}</span>
+            </div>
+            <button type="button" class="btn-secondary manager-small-button manager-edit-button" data-part-id="${part.id}">Edit Part</button>
+          </div>
+        </article>
+      `)
+      .join('')
+  }
+
+  const clearManagerData = () => {
+    managerParts = []
+    managerVehicles = []
+    currentSearch = ''
+    searchInput.value = ''
+    updateSummaryCards()
+    renderVehicleList([])
+    renderPartList()
+    resetForm()
+  }
+
+  const loadManagerData = async () => {
+    const [partsResponse, vehiclesResponse] = await Promise.all([
+      requestJson<ManagerPartsResponse>('/api/manager/parts'),
+      requestJson<ManagerVehiclesResponse>('/api/manager/vehicles'),
+    ])
+
+    managerParts = partsResponse.parts
+    managerVehicles = vehiclesResponse.vehicles
+    updateSummaryCards()
+    renderVehicleList()
+    renderPartList()
+  }
+
+  const checkSession = async () => {
+    try {
+      const session = await requestJson<ManagerSessionResponse>('/api/manager/session')
+
+      if (!session.configured) {
+        setLoginStatus('Manager access is not configured yet. Add MANAGER_PASSWORD and MANAGER_SESSION_SECRET to the env file.', 'error')
+        loginButton.disabled = true
+        return
+      }
+
+      loginButton.disabled = false
+
+      if (session.authenticated) {
+        setDashboardVisibility(true)
+        await loadManagerData()
+        resetForm()
+        return
+      }
+
+      clearManagerData()
+      setDashboardVisibility(false)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to verify the manager session.'
+      setLoginStatus(message, 'error')
+    }
+  }
+
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    setLoginStatus('Checking passcode...')
+
+    try {
+      await requestJson<ManagerSessionResponse>('/api/manager/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ passcode: passcodeInput.value }),
+      })
+
+      passcodeInput.value = ''
+      setLoginStatus()
+      setDashboardVisibility(true)
+      await loadManagerData()
+      resetForm()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to unlock the manager.'
+      setLoginStatus(message, 'error')
+    }
+  })
+
+  logoutButton.addEventListener('click', async () => {
+    await fetch('/api/manager/session', { method: 'DELETE' })
+    clearManagerData()
+    passcodeInput.value = ''
+    setFormStatus()
+    setDashboardVisibility(false)
+    setLoginStatus('Manager session closed.')
+    requestAnimationFrame(() => {
+      passcodeInput.focus()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  })
+
+  refreshButton.addEventListener('click', async () => {
+    setFormStatus('Refreshing catalog data...')
+
+    try {
+      await loadManagerData()
+      setFormStatus('Catalog data refreshed.', 'success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to refresh manager data.'
+      setFormStatus(message, 'error')
+    }
+  })
+
+  searchInput.addEventListener('input', (event) => {
+    currentSearch = (event.currentTarget as HTMLInputElement).value
+    renderPartList()
+  })
+
+  addVehicleButton.addEventListener('click', async () => {
+    const year = vehicleYearInput.value.trim()
+    const make = vehicleMakeInput.value.trim()
+    const model = vehicleModelInput.value.trim()
+
+    if (!year || !make || !model) {
+      setFormStatus('Vehicle year, make, and model are required.', 'error')
+      return
+    }
+
+    try {
+      const response = await requestJson<ManagerVehicleMutationResponse>('/api/manager/vehicles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ year, make, model }),
+      })
+
+      managerVehicles = managerVehicles.concat(response.vehicle).sort((left, right) => left.label.localeCompare(right.label))
+      renderVehicleList(getSelectedVehicleIds().concat(Number(response.vehicle.id)))
+      vehicleYearInput.value = ''
+      vehicleMakeInput.value = ''
+      vehicleModelInput.value = ''
+      updateSummaryCards()
+      setFormStatus(`Added vehicle ${response.vehicle.label}.`, 'success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to add the vehicle.'
+      setFormStatus(message, 'error')
+    }
+  })
+
+  uploadButton.addEventListener('click', async () => {
+    const selectedFile = imageFileInput.files?.[0]
+
+    if (!selectedFile) {
+      setFormStatus('Choose an image before uploading.', 'error')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('image', selectedFile)
+    setFormStatus('Uploading image...')
+
+    try {
+      const response = await fetch('/api/manager/uploads', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const payload = await response.json().catch(() => ({})) as UploadResponse
+
+      if (!response.ok) {
+        throw new Error(payload.error || 'Image upload failed.')
+      }
+
+      imagePathInput.value = payload.path
+      imagePreview.src = payload.path
+      setFormStatus('Image uploaded and ready to save with the part.', 'success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Image upload failed.'
+      setFormStatus(message, 'error')
+    }
+  })
+
+  partList.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement
+    const editButton = target.closest<HTMLElement>('.manager-edit-button')
+    const partId = editButton?.getAttribute('data-part-id')
+
+    if (!partId) {
+      return
+    }
+
+    const part = managerParts.find((entry) => entry.id === partId)
+
+    if (part) {
+      populateForm(part)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
+
+  partForm.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const isEditing = Boolean(currentEditPartId)
+    setFormStatus(isEditing ? 'Updating part...' : 'Creating part...')
+
+    const payload = {
+      title: partTitleInput.value,
+      sku: partSkuInput.value,
+      manufacturer: manufacturerInput.value,
+      category: categoryInput.value,
+      price: priceInput.value,
+      stock: stockInput.value,
+      description: descriptionInput.value,
+      positions: parseCommaList(positionsInput.value),
+      otherNames: parseCommaList(otherNamesInput.value),
+      replaces: replacesInput.value,
+      image: imagePathInput.value,
+      vehicleIds: getSelectedVehicleIds(),
+    }
+
+    try {
+      const response = await requestJson<ManagerPartMutationResponse>(
+        currentEditPartId ? `/api/manager/parts/${currentEditPartId}` : '/api/manager/parts',
+        {
+          method: currentEditPartId ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        },
+      )
+
+      await loadManagerData()
+
+      if (response.part) {
+        populateForm(response.part)
+      } else {
+        resetForm()
+      }
+
+      setFormStatus(isEditing ? 'Part updated.' : 'Part created.', 'success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to save the part.'
+      setFormStatus(message, 'error')
+    }
+  })
+
+  resetButton.addEventListener('click', () => {
+    resetForm()
+  })
+
+  newPartButton.addEventListener('click', () => {
+    resetForm()
+  })
+
+  void checkSession()
+}
+
 initHeroIntro()
 initServices()
 initWelcomeSections()
 initHeatmap()
 initAboutAnimations()
 initProductsPage()
+initManagerPage()

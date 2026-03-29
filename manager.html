@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manager | Thewconverts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body class="manager-page">
+  <nav class="navbar">
+    <div class="logo">
+      <img src="/logo.png" alt="Thewconverts Logo" />
+    </div>
+    <div class="nav-links">
+      <a href="/index.html#hero">Welcome</a>
+      <a href="/about.html">About</a>
+      <a href="/products.html">Products</a>
+      <a href="/about.html#faq">FAQ</a>
+    </div>
+    <a href="/index.html#contact" class="cta-nav">
+      <span class="cta-nav-kicker">Start Your Build</span>
+      <span class="cta-nav-label">Book Appointment</span>
+    </a>
+  </nav>
+
+  <main class="manager-main-shell">
+    <section class="manager-login-card" id="managerLoginCard">
+      <div class="manager-kicker">Protected manager access</div>
+      <h1 class="manager-title">INVENTORY CONTROL FOR LIVE PARTS AND FITMENT.</h1>
+      <p class="manager-body">
+        Use the manager passcode to update stock, create new parts, upload images, and link parts to the right vehicles.
+      </p>
+      <form class="manager-login-form" id="managerLoginForm">
+        <label class="manager-field">
+          <span>Manager passcode</span>
+          <input type="password" id="managerPasscode" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="btn-primary manager-login-button">Unlock Manager</button>
+      </form>
+      <p class="manager-status" id="managerLoginStatus" aria-live="polite"></p>
+    </section>
+
+    <section class="manager-dashboard" id="managerDashboard" hidden>
+      <header class="manager-dashboard-header">
+        <div>
+          <div class="manager-kicker">Manager system</div>
+          <h2 class="manager-section-title">PARTS, STOCK, IMAGES, AND VEHICLE FITMENT.</h2>
+          <p class="manager-section-body">
+            Keep the public catalog current by updating part details, inventory, and fitment links from one place.
+          </p>
+        </div>
+        <div class="manager-actions">
+          <button type="button" class="btn-secondary" id="managerRefreshButton">Refresh Data</button>
+          <button type="button" class="btn-secondary" id="managerLogoutButton">Log Out</button>
+        </div>
+      </header>
+
+      <section class="manager-summary-grid" aria-label="Manager summary">
+        <article class="manager-summary-card">
+          <span>Parts in catalog</span>
+          <strong id="managerPartCount">0</strong>
+        </article>
+        <article class="manager-summary-card">
+          <span>Vehicles in fitment list</span>
+          <strong id="managerVehicleCount">0</strong>
+        </article>
+        <article class="manager-summary-card">
+          <span>Total stock units</span>
+          <strong id="managerStockTotal">0</strong>
+        </article>
+      </section>
+
+      <div class="manager-grid">
+        <section class="manager-panel manager-editor-panel">
+          <div class="manager-panel-header">
+            <div>
+              <div class="manager-kicker">Part editor</div>
+              <h3 class="manager-panel-title" id="managerEditorTitle">Create a new part</h3>
+            </div>
+            <button type="button" class="btn-secondary manager-small-button" id="managerNewPartButton">Start New</button>
+          </div>
+
+          <form class="manager-part-form" id="managerPartForm">
+            <input type="hidden" id="managerPartId">
+
+            <div class="manager-form-grid">
+              <label class="manager-field">
+                <span>Part title</span>
+                <input type="text" id="managerPartTitle" required>
+              </label>
+
+              <label class="manager-field">
+                <span>SKU</span>
+                <input type="text" id="managerPartSku" placeholder="Optional. Falls back to numeric part id.">
+              </label>
+
+              <label class="manager-field">
+                <span>Manufacturer</span>
+                <input type="text" id="managerManufacturer" value="OEM">
+              </label>
+
+              <label class="manager-field">
+                <span>Category</span>
+                <input type="text" id="managerCategory" required placeholder="Lighting, Interior, Body part, and so on">
+              </label>
+
+              <label class="manager-field">
+                <span>Price</span>
+                <input type="number" step="0.01" id="managerPrice" placeholder="Optional">
+              </label>
+
+              <label class="manager-field">
+                <span>Stock</span>
+                <input type="number" min="0" step="1" id="managerStock" required>
+              </label>
+            </div>
+
+            <label class="manager-field">
+              <span>Description</span>
+              <textarea id="managerDescription" rows="5" required></textarea>
+            </label>
+
+            <div class="manager-form-grid">
+              <label class="manager-field">
+                <span>Positions</span>
+                <input type="text" id="managerPositions" placeholder="Comma separated">
+              </label>
+
+              <label class="manager-field">
+                <span>Other names</span>
+                <input type="text" id="managerOtherNames" placeholder="Comma separated">
+              </label>
+
+              <label class="manager-field">
+                <span>Replaces</span>
+                <input type="text" id="managerReplaces" placeholder="Optional replacement number">
+              </label>
+            </div>
+
+            <div class="manager-upload-grid">
+              <label class="manager-field manager-upload-field">
+                <span>Part image</span>
+                <input type="file" id="managerImageFile" accept="image/png,image/jpeg,image/webp,image/avif">
+              </label>
+              <button type="button" class="btn-secondary manager-upload-button" id="managerUploadButton">Upload Image</button>
+            </div>
+
+            <input type="hidden" id="managerImagePath">
+
+            <div class="manager-image-preview" id="managerImagePreview">
+              <img src="/logo.png" alt="Manager image preview" id="managerImagePreviewImg">
+            </div>
+
+            <section class="manager-fitment-panel">
+              <div class="manager-fitment-header">
+                <div>
+                  <div class="manager-kicker">Fitment selector</div>
+                  <h3 class="manager-panel-title">Link vehicles to this part</h3>
+                </div>
+              </div>
+
+              <div class="manager-vehicle-list" id="managerVehicleList" aria-live="polite"></div>
+
+              <div class="manager-inline-card">
+                <div class="manager-kicker">Add a vehicle</div>
+                <div class="manager-form-grid">
+                  <label class="manager-field">
+                    <span>Year</span>
+                    <input type="text" id="managerVehicleYear" placeholder="2025">
+                  </label>
+
+                  <label class="manager-field">
+                    <span>Make</span>
+                    <input type="text" id="managerVehicleMake" placeholder="GMC">
+                  </label>
+
+                  <label class="manager-field">
+                    <span>Model</span>
+                    <input type="text" id="managerVehicleModel" placeholder="Yukon XL">
+                  </label>
+                </div>
+                <button type="button" class="btn-secondary manager-small-button" id="managerAddVehicleButton">Add Vehicle</button>
+              </div>
+            </section>
+
+            <div class="manager-form-actions">
+              <button type="submit" class="btn-primary" id="managerSaveButton">Save Part</button>
+              <button type="button" class="btn-secondary" id="managerResetButton">Reset Form</button>
+            </div>
+          </form>
+
+          <p class="manager-status" id="managerFormStatus" aria-live="polite"></p>
+        </section>
+
+        <section class="manager-panel manager-list-panel">
+          <div class="manager-panel-header">
+            <div>
+              <div class="manager-kicker">Live parts</div>
+              <h3 class="manager-panel-title">Current catalog records</h3>
+            </div>
+          </div>
+
+          <label class="manager-field">
+            <span>Search parts</span>
+            <input type="search" id="managerSearchInput" placeholder="Search title, SKU, category, make, or model">
+          </label>
+
+          <div class="manager-part-list" id="managerPartList"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

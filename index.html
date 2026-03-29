@@ -62,12 +62,13 @@
       <div class="services-header split-line-wrapper">
         <div class="services-label">— SERVICES</div>
         <div class="services-title-row">
-          <h2 class="services-heading skew-text">EVERYTHING WE DO</h2>
+          <h2 class="services-heading">UPGRADE YOUR RIDE</h2>
           <div class="carousel-nav">
             <button class="nav-arrow" id="prevServices">←</button>
             <button class="nav-arrow" id="nextServices">→</button>
           </div>
         </div>
+        <p class="services-intro">Explore premium OEM capabilities, custom finishes, and conversion packages built to elevate every detail.</p>
       </div>
 
       <div class="services-track" id="servicesTrack">
@@ -76,9 +77,9 @@
           <div class="service-image-container">
             <img src="/truck_custom_build.png" alt="Full Custom Builds">
           </div>
-          <h3 class="service-title skew-text">FULL CUSTOM BUILDS</h3>
-          <p class="service-subtitle">You dream it up, we'll build it</p>
-          <div class="learn-more-btn">LEARN MORE</div>
+          <h3 class="service-title">FULL CUSTOM BUILDS</h3>
+          <p class="service-subtitle">Explore complete truck transformations tailored to your vision.</p>
+          <div class="learn-more-btn">VIEW DETAILS</div>
         </div>
 
         <!-- Service Card 2 -->
@@ -86,9 +87,9 @@
           <div class="service-image-container">
             <img src="/truck_paint_match.png" alt="Custom Paint Match">
           </div>
-          <h3 class="service-title skew-text">CUSTOM PAINT MATCH</h3>
-          <p class="service-subtitle">Go from the cheap OEM look to luxury</p>
-          <div class="learn-more-btn">LEARN MORE</div>
+          <h3 class="service-title">CUSTOM PAINT MATCH</h3>
+          <p class="service-subtitle">Factory quality paint matching for a clean, seamless finish.</p>
+          <div class="learn-more-btn">VIEW DETAILS</div>
         </div>
 
         <!-- Service Card 3 -->
@@ -96,9 +97,9 @@
           <div class="service-image-container">
             <img src="/truck_window_tint.png" alt="Window Tints">
           </div>
-          <h3 class="service-title skew-text">WINDOW TINTS</h3>
-          <p class="service-subtitle">Enhance privacy & reduce heat</p>
-          <div class="learn-more-btn">LEARN MORE</div>
+          <h3 class="service-title">WINDOW TINTS</h3>
+          <p class="service-subtitle">Sharpen privacy, reduce heat, and refine the overall look.</p>
+          <div class="learn-more-btn">VIEW DETAILS</div>
         </div>
 
         <!-- Service Card 4 (to prove scrolling works) -->
@@ -106,13 +107,16 @@
           <div class="service-image-container"
             style="background:var(--text-dark); height:500px; display:flex; align-items:center; justify-content:center;">
             <span
-              style="color:var(--text-light); font-family:var(--font-display); transform:skewX(-10deg); font-size:2rem;">MORE
-              UPGRADES</span>
+              style="color:var(--text-light); font-family:var(--font-display); font-size:2rem; letter-spacing:0.08em;">EXPLORE
+              MORE</span>
           </div>
-          <h3 class="service-title skew-text">SUSPENSION LIFT KITS</h3>
-          <p class="service-subtitle">Superior ground clearance and stance</p>
-          <div class="learn-more-btn">LEARN MORE</div>
+          <h3 class="service-title">SUSPENSION LIFT KITS</h3>
+          <p class="service-subtitle">Dial in stance, clearance, and daily drivability with confidence.</p>
+          <div class="learn-more-btn">EXPLORE BUILD</div>
         </div>
+      </div>
+      <div class="services-progress" aria-hidden="true">
+        <div class="services-progress-fill" id="servicesProgress"></div>
       </div>
     </div>
   </section>
@@ -128,16 +132,19 @@
             <button class="toggle-btn" data-view="interior">INTERIOR</button>
           </div>
         </div>
+        <div class="heatmap-instruction">
+          <span class="heatmap-instruction-dot"></span>
+          <span>Click the red dots to view more information.</span>
+        </div>
       </div>
 
       <div class="heatmap-canvas">
         <!-- Exterior View -->
         <div class="heatmap-view active-view" id="exterior-view">
-          <img src="/2024-Ford-F150%20Regular%20Cab-front_54109_032_2400x1800_YZ_nologo.png"
-            alt="2024 Ford F150 Exterior" class="heatmap-image">
+          <img src="/I_want_to_202603282052.png" alt="2024 Ford F150 Exterior" class="heatmap-image">
 
           <!-- Hotspot: Headlights -->
-          <button class="hotspot-pin" style="top: 47.3%; left: 37.9%;" data-title="OEM Headlights"
+          <button class="hotspot-pin" style="top: 47.6%; left: 30.2%;" data-title="OEM Headlights"
             data-desc="Upgrade to factory-grade LED headlights for superior visibility and modern styling."
             data-img="/Product-Image-1.jpeg">
             <div class="pin-ring"></div>
@@ -145,7 +152,7 @@
           </button>
 
           <!-- Hotspot: Grille -->
-          <button class="hotspot-pin" style="top: 49.8%; left: 28.4%;" data-title="Custom Grille"
+          <button class="hotspot-pin" style="top: 50.1%; left: 14.3%;" data-title="Custom Grille"
             data-desc="Aggressive front-end styling with direct bolt-on OEM or premium aftermarket grilles."
             data-img="/Product-Image-2.jpeg">
             <div class="pin-ring"></div>
@@ -153,7 +160,7 @@
           </button>
 
           <!-- Hotspot: Suspension / Wheels -->
-          <button class="hotspot-pin" style="top: 64.3%; left: 44.5%;" data-title="Suspension & Wheels"
+          <button class="hotspot-pin" style="top: 64.2%; left: 40.6%;" data-title="Suspension & Wheels"
             data-desc="Leveling kits and OEM wheel upgrades for a perfect stance and improved clearance."
             data-img="/Product-Image-3.jpeg">
             <div class="pin-ring"></div>
@@ -171,19 +178,19 @@
 
         <!-- Interior View -->
         <div class="heatmap-view" id="interior-view">
-          <img src="/2026-Ford-F-150-Interior.jpg" alt="2026 Ford F150 Interior" class="heatmap-image">
+          <img src="/Have_the_console_202603282107.png" alt="2026 Ford F150 Interior" class="heatmap-image">
 
 
           <!-- Hotspot: Steering Wheel -->
-          <button class="hotspot-pin" style="top: 23.9%; left: 86.1%;" data-title="Premium Steering Wheel"
+          <button class="hotspot-pin" style="top: 49.2%; left: 37.0%;" data-title="Premium Steering Wheel"
             data-desc="Leather-wrapped or Raptor-style steering wheels with full functional controls intact."
-            data-img="/Product-Image-5.jpeg">
+            data-img="/steering-=wheel.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
 
           <!-- Hotspot: Cluster -->
-          <button class="hotspot-pin" style="top: 49.3%; left: 94.3%;" data-title="Digital Cluster Panel"
+          <button class="hotspot-pin" style="top: 51.8%; left: 45.7%;" data-title="Digital Cluster Panel"
             data-desc="Fully digital instrument cluster upgrade directly from higher trim packages."
             data-img="/Product-Image-1.jpeg">
             <div class="pin-ring"></div>
@@ -191,16 +198,15 @@
           </button>
 
           <!-- Hotspot: Center Console -->
-          <button class="hotspot-pin" style="top: 42.5%; left: 57.6%;" data-title="Center Console"
+          <button class="hotspot-pin" style="top: 59.3%; left: 70.8%;" data-title="Center Console"
             data-desc="Premium center console upgrades with additional storage and charging options."
             data-img="/Product-Image-2.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
           <!--HotSpot: Seat -->
-          <button class="hotspot-pin" style="top: 67.7%; left: 31.8%;" data-title="Seat"
-            data-desc="Premium leather seat upgrades with heating and cooling."
-            data-img="/Product-Image-3.jpeg">
+          <button class="hotspot-pin" style="top: 47.2%; left: 86.5%;" data-title="Seat"
+            data-desc="Premium leather seat upgrades with heating and cooling." data-img="/Product-Image-3.jpeg">
             <div class="pin-ring"></div>
             <div class="pin-dot"></div>
           </button>
@@ -243,7 +249,7 @@
         <div class="contact-label">— GET IN TOUCH</div>
         <h2 class="contact-heading skew-text">READY TO BUILD?</h2>
       </div>
-      
+
       <div class="contact-grid">
         <div class="contact-form-wrapper">
           <form class="contact-form">
@@ -259,12 +265,13 @@
             </div>
             <div class="form-group">
               <label for="message">MESSAGE</label>
-              <textarea id="message" rows="4" placeholder="Tell us about your truck and what OEM upgrades you're looking for..." required></textarea>
+              <textarea id="message" rows="4"
+                placeholder="Tell us about your truck and what OEM upgrades you're looking for..." required></textarea>
             </div>
             <button type="submit" class="btn-primary form-submit">SEND INQUIRY</button>
           </form>
         </div>
-        
+
         <div class="contact-info-wrapper">
           <div class="info-block">
             <h3>DIRECT CONTACT</h3>
@@ -273,8 +280,10 @@
           <div class="info-block">
             <h3>FOLLOW US</h3>
             <div class="social-links">
-              <a href="https://instagram.com/thewconverts" target="_blank" class="social-link">Instagram <span>@thewconverts</span></a>
-              <a href="https://tiktok.com/@thewconverts" target="_blank" class="social-link">TikTok <span>@thewconverts</span></a>
+              <a href="https://instagram.com/thewconverts" target="_blank" class="social-link">Instagram
+                <span>@thewconverts</span></a>
+              <a href="https://tiktok.com/@thewconverts" target="_blank" class="social-link">TikTok
+                <span>@thewconverts</span></a>
             </div>
           </div>
         </div>
@@ -302,35 +311,51 @@
         <div class="legal-grid">
           <div class="legal-item">
             <h6>Fitment & Compatibility</h6>
-            <p>Compatibility depends on the customer's specific vehicle configuration. Buyers must verify fitment before purchase. We are not responsible if a part does not work due to undocumented factory options or prior modifications.</p>
+            <p>Compatibility depends on the customer's specific vehicle configuration. Buyers must verify fitment before
+              purchase. We are not responsible if a part does not work due to undocumented factory options or prior
+              modifications.</p>
           </div>
           <div class="legal-item">
             <h6>Installation & Use</h6>
-            <p>Professional installation is recommended. We are not responsible for damage, injury, or malfunctions resulting from improper installation or misuse of our products.</p>
+            <p>Professional installation is recommended. We are not responsible for damage, injury, or malfunctions
+              resulting from improper installation or misuse of our products.</p>
           </div>
           <div class="legal-item">
             <h6>No Manufacturer Affiliation</h6>
-            <p>Thewconverts LLC is not affiliated with, endorsed by, or sponsored by Ford or any other vehicle manufacturer. All manufacturer names and trademarks are used for identification purposes only.</p>
+            <p>Thewconverts LLC is not affiliated with, endorsed by, or sponsored by Ford or any other vehicle
+              manufacturer. All manufacturer names and trademarks are used for identification purposes only.</p>
           </div>
           <div class="legal-item">
             <h6>Warranty</h6>
-            <p>All parts are inspected and tested prior to shipment. Items that arrive defective or non-functional are eligible for warranty consideration. Proof of failure may be required. Warranty does not cover damage caused by improper installation, misuse, modification, or failure to follow provided instructions. Professional installation is strongly recommended for complex components. Except for verified defective items, all sales are final and non-returnable.</p>
+            <p>All parts are inspected and tested prior to shipment. Items that arrive defective or non-functional are
+              eligible for warranty consideration. Proof of failure may be required. Warranty does not cover damage
+              caused by improper installation, misuse, modification, or failure to follow provided instructions.
+              Professional installation is strongly recommended for complex components. Except for verified defective
+              items, all sales are final and non-returnable.</p>
           </div>
           <div class="legal-item">
             <h6>Limitation of Liability</h6>
-            <p>To the fullest extent permitted by law, Thewconverts LLC shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of, inability to use, or installation of our products — including but not limited to loss of use, loss of income, vehicle downtime, property damage, or personal injury. Our total liability shall not exceed the original purchase price of the product in question.</p>
+            <p>To the fullest extent permitted by law, Thewconverts LLC shall not be liable for any indirect,
+              incidental, special, or consequential damages arising from the use of, inability to use, or installation
+              of our products — including but not limited to loss of use, loss of income, vehicle downtime, property
+              damage, or personal injury. Our total liability shall not exceed the original purchase price of the
+              product in question.</p>
           </div>
           <div class="legal-item">
             <h6>Programming & Electronic Modifications</h6>
-            <p>Some upgrades for modern trucks may require programming, calibration, or additional modules. These are not included unless explicitly specified in the product listing.</p>
+            <p>Some upgrades for modern trucks may require programming, calibration, or additional modules. These are
+              not included unless explicitly specified in the product listing.</p>
           </div>
           <div class="legal-item">
             <h6>Confidentiality & Privacy</h6>
-            <p>We do not publicly disclose sensitive business information including supplier identities, sourcing channels, wholesale pricing, proprietary processes, or custom harness designs. All customer information is used solely for order fulfillment and support, and will not be shared without consent except as required by law.</p>
+            <p>We do not publicly disclose sensitive business information including supplier identities, sourcing
+              channels, wholesale pricing, proprietary processes, or custom harness designs. All customer information is
+              used solely for order fulfillment and support, and will not be shared without consent except as required
+              by law.</p>
           </div>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2026 Thewconverts LLC. All rights reserved.</p>
       </div>

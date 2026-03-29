@@ -29,6 +29,7 @@ gsap.registerPlugin(ScrollTrigger)
 
   servicesTl.from('.services-label', { opacity: 0, y: 20, duration: 0.6 })
     .from('.services-heading', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' }, '-=0.4')
+    .from('.services-intro', { opacity: 0, y: 24, duration: 0.6 }, '-=0.5')
     .from('.nav-arrow', { opacity: 0, scale: 0.8, stagger: 0.1, duration: 0.4 }, '-=0.6')
     .from('.service-card', { 
       opacity: 0, 
@@ -42,6 +43,32 @@ gsap.registerPlugin(ScrollTrigger)
   const track = document.getElementById('servicesTrack')
   const prevBtn = document.getElementById('prevServices')
   const nextBtn = document.getElementById('nextServices')
+  const servicesProgress = document.getElementById('servicesProgress') as HTMLElement | null
+
+  if (prevBtn && nextBtn) {
+    prevBtn.textContent = '←'
+    nextBtn.textContent = '→'
+  }
+
+  const servicesLabel = document.querySelector('.services-label') as HTMLElement | null
+
+  if (servicesLabel) {
+    servicesLabel.textContent = ''
+    servicesLabel.setAttribute('aria-label', 'Explore')
+  }
+
+  const updateServicesProgress = () => {
+    if (!track || !servicesProgress) return
+
+    const maxScroll = track.scrollWidth - track.clientWidth
+    const progress = maxScroll > 0 ? (track.scrollLeft / maxScroll) * 100 : 100
+    servicesProgress.style.width = `${progress}%`
+  }
+
+  if (prevBtn && nextBtn) {
+    prevBtn.textContent = '\u2190'
+    nextBtn.textContent = '\u2192'
+  }
 
   if (track && prevBtn && nextBtn) {
     prevBtn.addEventListener('click', () => {
@@ -55,6 +82,10 @@ gsap.registerPlugin(ScrollTrigger)
       const scrollAmount = card ? card.offsetWidth + 48 : 480
       track.scrollBy({ left: scrollAmount, behavior: 'smooth' })
     })
+
+    track.addEventListener('scroll', updateServicesProgress, { passive: true })
+    window.addEventListener('resize', updateServicesProgress)
+    updateServicesProgress()
   }
 
   // Navbar solid background on scroll
@@ -116,9 +147,30 @@ gsap.registerPlugin(ScrollTrigger)
   })
 
   // Open Popover
-  let popoverTimeout: ReturnType<typeof setTimeout> | null = null;
+  let popoverTimeout: ReturnType<typeof setTimeout> | null = null
+  const HOTSPOT_POPOVER_GAP = 35
+  const HOTSPOT_POPOVER_PADDING = 16
   const allPins = document.querySelectorAll('.hotspot-pin')
   const popoverImg = document.getElementById('popover-img') as HTMLImageElement
+
+  const clamp = (value: number, min: number, max: number) => {
+    if (min > max) return min
+    return Math.min(Math.max(value, min), max)
+  }
+
+  const getPositionWithinAncestor = (element: HTMLElement, ancestor: HTMLElement) => {
+    let left = 0
+    let top = 0
+    let current: HTMLElement | null = element
+
+    while (current && current !== ancestor) {
+      left += current.offsetLeft
+      top += current.offsetTop
+      current = current.offsetParent as HTMLElement | null
+    }
+
+    return { left, top }
+  }
 
   allPins.forEach(pin => {
     pin.addEventListener('click', (e) => {
@@ -145,18 +197,40 @@ gsap.registerPlugin(ScrollTrigger)
           
           const canvas = target.closest('.heatmap-canvas') as HTMLElement
           if (canvas) {
-            const pinRect = target.getBoundingClientRect()
-            const canvasRect = canvas.getBoundingClientRect()
-            
-            const x = pinRect.left - canvasRect.left + (pinRect.width / 2)
-            const y = pinRect.top - canvasRect.top
-            
-            popover.classList.remove('flip-left')
-            if (x + 360 > canvasRect.width) {
-               popover.classList.add('flip-left')
-            }
-            popover.style.left = `${x}px`
-            popover.style.top = `${y}px`
+            const pinPosition = getPositionWithinAncestor(target, canvas)
+            const pinCenterX = pinPosition.left + (target.offsetWidth / 2)
+            const pinCenterY = pinPosition.top + (target.offsetHeight / 2)
+            const popoverWidth = popover.offsetWidth || 320
+            const popoverHeight = popover.offsetHeight || 0
+            const canvasWidth = canvas.clientWidth
+            const canvasHeight = canvas.clientHeight
+            const canFitOnRight =
+              pinCenterX + HOTSPOT_POPOVER_GAP + popoverWidth <= canvasWidth - HOTSPOT_POPOVER_PADDING
+            const canFitOnLeft =
+              pinCenterX - HOTSPOT_POPOVER_GAP - popoverWidth >= HOTSPOT_POPOVER_PADDING
+
+            const shouldFlipLeft =
+              (!canFitOnRight && canFitOnLeft) ||
+              (!canFitOnRight && !canFitOnLeft && pinCenterX > canvasWidth / 2)
+
+            const preferredLeft = shouldFlipLeft
+              ? pinCenterX - HOTSPOT_POPOVER_GAP - popoverWidth
+              : pinCenterX + HOTSPOT_POPOVER_GAP
+
+            const clampedLeft = clamp(
+              preferredLeft,
+              HOTSPOT_POPOVER_PADDING,
+              canvasWidth - popoverWidth - HOTSPOT_POPOVER_PADDING
+            )
+            const clampedTop = clamp(
+              pinCenterY,
+              (popoverHeight / 2) + HOTSPOT_POPOVER_PADDING,
+              canvasHeight - (popoverHeight / 2) - HOTSPOT_POPOVER_PADDING
+            )
+
+            popover.classList.toggle('flip-left', shouldFlipLeft)
+            popover.style.left = `${clampedLeft}px`
+            popover.style.top = `${clampedTop}px`
           }
 
           popover.classList.add('visible')

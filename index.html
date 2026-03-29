@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css">
 </head>
@@ -57,21 +57,153 @@
     </div>
   </header>
 
-  <section class="next-section pin-section">
-    <div class="container">
-      <h2 class="section-title text-marquee">GENUINE COMPONENTS. PERFECT FIT. ENTHUSIAST BUILT.</h2>
-      <div class="stats-row">
-        <div class="stat-item">
-          <div>
-            <div class="stat-number" data-target="100">0</div><span class="stat-suffix">%</span>
+  <section class="services-section" id="services">
+    <div class="container services-container">
+      <div class="services-header split-line-wrapper">
+        <div class="services-label">— SERVICES</div>
+        <div class="services-title-row">
+          <h2 class="services-heading skew-text">EVERYTHING WE DO</h2>
+          <div class="carousel-nav">
+            <button class="nav-arrow" id="prevServices">←</button>
+            <button class="nav-arrow" id="nextServices">→</button>
           </div>
-          <div class="stat-label">OEM FITMENT</div>
         </div>
-        <div class="stat-item">
-          <div>
-            <div class="stat-number" data-target="24">0</div><span class="stat-suffix">/ 7</span>
+      </div>
+
+      <div class="services-track" id="servicesTrack">
+        <!-- Service Card 1 -->
+        <div class="service-card">
+          <div class="service-image-container">
+            <img src="/truck_custom_build.png" alt="Full Custom Builds">
           </div>
-          <div class="stat-label">SUPPORT</div>
+          <h3 class="service-title skew-text">FULL CUSTOM BUILDS</h3>
+          <p class="service-subtitle">You dream it up, we'll build it</p>
+          <div class="learn-more-btn">LEARN MORE</div>
+        </div>
+
+        <!-- Service Card 2 -->
+        <div class="service-card">
+          <div class="service-image-container">
+            <img src="/truck_paint_match.png" alt="Custom Paint Match">
+          </div>
+          <h3 class="service-title skew-text">CUSTOM PAINT MATCH</h3>
+          <p class="service-subtitle">Go from the cheap OEM look to luxury</p>
+          <div class="learn-more-btn">LEARN MORE</div>
+        </div>
+
+        <!-- Service Card 3 -->
+        <div class="service-card">
+          <div class="service-image-container">
+            <img src="/truck_window_tint.png" alt="Window Tints">
+          </div>
+          <h3 class="service-title skew-text">WINDOW TINTS</h3>
+          <p class="service-subtitle">Enhance privacy & reduce heat</p>
+          <div class="learn-more-btn">LEARN MORE</div>
+        </div>
+
+        <!-- Service Card 4 (to prove scrolling works) -->
+        <div class="service-card">
+          <div class="service-image-container"
+            style="background:var(--text-dark); height:500px; display:flex; align-items:center; justify-content:center;">
+            <span
+              style="color:var(--text-light); font-family:var(--font-display); transform:skewX(-10deg); font-size:2rem;">MORE
+              UPGRADES</span>
+          </div>
+          <h3 class="service-title skew-text">SUSPENSION LIFT KITS</h3>
+          <p class="service-subtitle">Superior ground clearance and stance</p>
+          <div class="learn-more-btn">LEARN MORE</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="heatmap-section" id="interactive-builds">
+    <div class="container heatmap-container">
+      <div class="heatmap-header split-line-wrapper">
+        <div class="heatmap-label">— OEM INTERACTIVE VIEWER</div>
+        <div class="heatmap-title-row">
+          <h2 class="heatmap-heading skew-text">EXPLORE THE OPTIONS</h2>
+          <div class="view-toggle">
+            <button class="toggle-btn active" data-view="exterior">EXTERIOR</button>
+            <button class="toggle-btn" data-view="interior">INTERIOR</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="heatmap-canvas">
+        <!-- Exterior View -->
+        <div class="heatmap-view active-view" id="exterior-view">
+          <img src="/2024-Ford-F150%20Regular%20Cab-front_54109_032_2400x1800_YZ_nologo.png"
+            alt="2024 Ford F150 Exterior" class="heatmap-image">
+
+          <!-- Hotspot: Headlights -->
+          <button class="hotspot-pin" style="top: 47.3%; left: 37.9%;" data-title="OEM Headlights"
+            data-desc="Upgrade to factory-grade LED headlights for superior visibility and modern styling.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+
+          <!-- Hotspot: Grille -->
+          <button class="hotspot-pin" style="top: 49.8%; left: 28.4%;" data-title="Custom Grille"
+            data-desc="Aggressive front-end styling with direct bolt-on OEM or premium aftermarket grilles.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+
+          <!-- Hotspot: Suspension / Wheels -->
+          <button class="hotspot-pin" style="top: 64.3%; left: 44.5%;" data-title="Suspension & Wheels"
+            data-desc="Leveling kits and OEM wheel upgrades for a perfect stance and improved clearance.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+
+          <!-- Hotspot: Mirrors -->
+          <button class="hotspot-pin" style="top: 41.8%; left: 52.2%;" data-title="Mirrors"
+            data-desc="OEM mirror upgrades with blind spot monitoring and power-folding.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+        </div>
+
+        <!-- Interior View -->
+        <div class="heatmap-view" id="interior-view">
+          <img src="/2026-Ford-F-150-Interior.jpg" alt="2026 Ford F150 Interior" class="heatmap-image">
+
+
+          <!-- Hotspot: Steering Wheel -->
+          <button class="hotspot-pin" style="top: 23.9%; left: 86.1%;" data-title="Premium Steering Wheel"
+            data-desc="Leather-wrapped or Raptor-style steering wheels with full functional controls intact.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+
+          <!-- Hotspot: Cluster -->
+          <button class="hotspot-pin" style="top: 49.3%; left: 94.3%;" data-title="Digital Cluster Panel"
+            data-desc="Fully digital instrument cluster upgrade directly from higher trim packages.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+
+          <!-- Hotspot: Center Console -->
+          <button class="hotspot-pin" style="top: 42.5%; left: 57.6%;" data-title="Center Console"
+            data-desc="Premium center console upgrades with additional storage and charging options.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+          <!--HotSpot: Seat -->
+          <button class="hotspot-pin" style="top: 67.7%; left: 31.8%;" data-title="Seat"
+            data-desc="Premium leather seat upgrades with heating and cooling.">
+            <div class="pin-ring"></div>
+            <div class="pin-dot"></div>
+          </button>
+        </div>
+
+        <!-- Hotspot Detail Popover (Shared) -->
+        <div class="hotspot-popover" id="hotspot-popover">
+          <button class="close-popover" id="close-popover">✕</button>
+          <h4 class="popover-title" id="popover-title">OEM Part</h4>
+          <p class="popover-desc" id="popover-desc">Part description goes here.</p>
+          <a href="#products" class="btn-primary popover-btn">View Products</a>
         </div>
       </div>
     </div>

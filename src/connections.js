@@ -103,18 +103,19 @@ const readJsonBody = async (request, maxBytes = 1024 * 1024) => {
 }
 
 const resolveMongoUri = () => {
+  const rawPassword = process.env.MONGODB_PASSWORD
+
+  if (rawPassword) {
+    const password = encodeURIComponent(rawPassword)
+
+    return `mongodb+srv://mainUser:${password}@hackathoncluster.spemcti.mongodb.net/?appName=HackathonCluster`
+  }
+
   if (process.env.MONGODB_URI) {
-    return process.env.MONGODB_URI
+    return process.env.MONGODB_URI.trim()
   }
 
-  if (!process.env.MONGODB_PASSWORD) {
-    throw new Error('Missing MONGODB_URI or MONGODB_PASSWORD in .env')
-  }
-
-  const password = encodeURIComponent(process.env.MONGODB_PASSWORD)
-  const appName = encodeURIComponent(mongoConfig.appName)
-
-  return `mongodb+srv://${mongoConfig.username}:${password}@${mongoConfig.clusterHost}/${mongoConfig.dbName}?retryWrites=true&w=majority&appName=${appName}`
+  throw new Error('Missing MONGODB_PASSWORD or MONGODB_URI in .env')
 }
 
 const getMongoClient = async () => {
